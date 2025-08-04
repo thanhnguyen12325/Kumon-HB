@@ -28,9 +28,13 @@
         </thead>
     </table>
 
-<script>
+   <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.1.js"></script>
+   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.2/moment.min.js"></script>
+   <script type="text/javascript" src="https://cdn.datatables.net/2.3.2/js/dataTables.js"></script>
+
+  <script>
   new DataTable('#Book', {
-    ajax: 'https://script.google.com/macros/s/AKfycbyadYNLanAW6jZRwX9Uw76jdoZoMI1hZMbPhNFwl2S_HHYHjTksgBj-yqvFoNkS3RLx/exec',
+    ajax: 'https://script.google.com/macros/s/AKfycby_dmHR24l69Itns1bXMeq722I_FFnbq1iGhkJPRvctwujfnycSilScmTVlVYl2ayzk/exec',
     columns: [
         { data: 'Rating' },
         { data: 'Reviews' },
@@ -41,11 +45,6 @@
     ]
 });
 </script>
-
-   <script type="text/javascripts" src="https://code.jquery.com/jquery-3.7.1.js"></script>
-   <script type="text/javascripts" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.2/moment.min.js"></script>
-   <script type="text/javascripts" src="https://cdn.datatables.net/2.3.2/js/dataTables.js"></script>
-
 </body>
 
 </html>
