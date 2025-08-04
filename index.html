@@ -85,6 +85,13 @@
     //Greater than logic
     return rowValue < headerValue;
   }
+  function doGet() {
+  return HtmlService.createHtmlOutputFromFile('index');
+}
+
+function getMyData() {
+  return "Code.gs!";
+}
 </script>
   
 </body>
