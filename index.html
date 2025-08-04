@@ -85,7 +85,10 @@
     //Greater than logic
     return rowValue < headerValue;
   }
- 
+ google.script.run.withSuccessHandler(function(response) {
+        document.getElementById("message").innerText = response;
+      }).getMyData();
+
 </script>
   
 </body>
