@@ -103,6 +103,7 @@ main.table {
 
     overflow: auto;
     overflow: overlay;
+    padding:10px;
 }
 
 
