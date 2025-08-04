@@ -88,19 +88,34 @@
     //Greater than logic
     return rowValue < headerValue;
   }
- google.script.run.withSuccessHandler(function(response) {
-        document.getElementById("message").innerText = response;
-      }).getMyData();
   
-fetch("https://script.google.com/macros/s/AKfycbxkS6ImD1o-bJQV7J_02CGd243Y_3U8ub9Gvk-Hbe_tnAHs6vwo8jyHUBvTUtqKG3iU/exec")
-      .then(response => response.text())
-      .then(data => {
-        document.getElementById("response").innerText = data;
-      })
-      .catch(error => {
-        console.error("Error:", error);
+function createTable() {
+  fetch("https://script.google.com/macros/s/AKfycbxkS6ImD1o-bJQV7J_02CGd243Y_3U8ub9Gvk-Hbe_tnAHs6vwo8jyHUBvTUtqKG3iU/exec")
+    .then(response => response.json()) // assuming your Apps Script returns JSON
+    .then(tableData => {
+      let table = new Tabulator("#example-table", {
+        data: tableData,
+        pagination: true,
+        paginationSize: 10,
+        paginationSizeSelector: true,
+        movableColumns: true,
+        responsiveLayout: "collapse",
+        layout: "fitColumns",
+        columnDefaults: { tooltip: true },
+        columns: [
+          { title: "Rating", field: "Rating", formatter: "star" },
+          { title: "Reviews", field: "Reviews", headerFilter: true, headerFilterPlaceholder: "Min. Reviews", headerFilterFunc: greaterThanFilter },
+          { title: "Book title", field: "Book title", headerFilter: true, headerFilterPlaceholder: "Book Title", width: 400 },
+          { title: "Number of Pages", field: "Number of Pages", headerFilter: true, headerFilterPlaceholder: "Min. Pages", headerFilterFunc: greaterThanFilter },
+          { title: "Type", field: "Type", headerFilter: true },
+          { title: "Price", field: "Price", headerFilter: true, headerFilterPlaceholder: "Max. Price", headerFilterFunc: lessThanFilter }
+        ]
       });
-
+    })
+    .catch(error => {
+      console.error("Error loading table data:", error);
+    });
+}
 </script>
   
 </body>
