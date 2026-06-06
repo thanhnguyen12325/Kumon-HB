@@ -450,6 +450,7 @@
 
   margin-bottom:8px;
 }
+    
 .metric:hover{
   transform:translateY(-4px);
 }
@@ -477,6 +478,12 @@
       margin-bottom: 14px;
       box-shadow: var(--soft-shadow);
     }
+    #tuitionFilterInfo{
+  margin:12px 0 16px;
+  font-size:14px;
+  font-weight:600;
+  color:#1f6feb;
+}
     .subject-card{
 
   background:white;
@@ -975,45 +982,31 @@ textarea{
 <section id="tuitionView" class="view hidden">
 
   <div class="summary" id="tuitionSummary">
-    <div class="metric total">
-      <b id="totalRevenue">0</b>
-      <span>Tổng doanh thu</span>
-    </div>
-
-    <div class="metric active">
-      <b id="monthlyRevenue">0</b>
-      <span>Doanh thu tháng</span>
-    </div>
-
-    <div class="metric stopped">
-      <b id="totalDebt">0</b>
-      <span>Học phí còn nợ</span>
-    </div>
+    ...
   </div>
+
+  <div id="tuitionFilterInfo"></div>
 
   <section class="panel">
+
     <div class="panel-header">
+      <h2>Danh sách giao dịch</h2>
 
-  <h2>Danh sách giao dịch</h2>
+      <div class="toolbar">
+        <input type="month" id="paymentMonthFilter">
 
-  <div class="toolbar">
+        <button
+          type="button"
+          id="clearPaymentMonth">
+          Tất cả
+        </button>
+      </div>
+    </div>
 
-    <input
-      type="month"
-      id="paymentMonthFilter">
-
-    <button
-      type="button"
-      id="clearPaymentMonth">
-      Tất cả
-    </button>
-
-  </div>
-
-</div>
     <div class="body">
       <div id="paymentTable"></div>
     </div>
+
   </section>
 
 </section>
