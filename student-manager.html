@@ -1048,42 +1048,70 @@ englishTime2: $("englishTime2"),
 
     async function init() {
       await setupCloud();
-      students = await loadStudentsFromCloud();
+      students = await loadStudents();
       bindEvents();
       renderAll();
     }
 
-    async function setupCloud() {
-      const config = {
-  apiKey: "AIzaSyCYM6Dscm6b_hq0WZAqPSI2WNQu5NQaYag",
-  authDomain: "kumon-hiepbinh.firebaseapp.com",
-  projectId: "kumon-hiepbinh",
-  storageBucket: "kumon-hiepbinh.firebasestorage.app",
-  messagingSenderId: "1054668776327",
-  appId: "1:1054668776327:web:b3039eb62dffc48f56e922"
-};
-      $("firebaseConfig").value = saved || "";
-      if (!saved) {
-        $("storageStatus").textContent = "Local database";
-        return;
-      }
+async function setupCloud() {
 
-      try {
-        const config = JSON.parse(saved);
-        const appMod = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js");
-        const dbMod = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js");
-        const app =
-  appMod.initializeApp(config);
-        const db = dbMod.getFirestore(app);
-        cloud = { db, ...dbMod };
-        $("storageStatus").textContent = "Firestore online";
-        $("storageStatus").className = "status db";
-      } catch (error) {
-        console.warn(error);
-        $("storageStatus").textContent = "Local database";
-        alert("Chưa kết nối được Firebase. Ứng dụng đang dùng local database.");
-      }
-    }
+  try {
+
+    const config = {
+      apiKey: "AIzaSyCYM6Dscm6b_hq0WZAqPSI2WNQu5NQaYag",
+      authDomain: "kumon-hiepbinh.firebaseapp.com",
+      projectId: "kumon-hiepbinh",
+      storageBucket: "kumon-hiepbinh.firebasestorage.app",
+      messagingSenderId: "1054668776327",
+      appId: "1:1054668776327:web:b3039eb62dffc48f56e922"
+    };
+
+    const appMod =
+      await import(
+        "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js"
+      );
+
+    const dbMod =
+      await import(
+        "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js"
+      );
+
+    const app =
+      appMod.initializeApp(config);
+
+    const db =
+      dbMod.getFirestore(app);
+
+    cloud = {
+      db,
+      ...dbMod
+    };
+
+    $("storageStatus").textContent =
+      "Firestore online";
+
+    $("storageStatus").className =
+      "status db";
+
+    console.log("🔥 Firestore connected");
+
+  }
+  catch(error){
+
+    console.error(error);
+
+    $("storageStatus").textContent =
+      "Local database";
+
+    $("storageStatus").className =
+      "status local";
+
+    alert(
+      "Không kết nối được Firestore. Hệ thống chuyển sang Local Database."
+    );
+  }
+
+}
     async function loadStudents() {
       if (cloud) {
         const snap = await cloud.getDocs(cloud.collection(cloud.db, "students"));
