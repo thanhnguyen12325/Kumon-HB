@@ -982,8 +982,23 @@ textarea{
 <section id="tuitionView" class="view hidden">
 
   <div class="summary" id="tuitionSummary">
-    ...
+
+  <div class="metric total">
+    <b id="totalRevenue">0</b>
+    <span>Tổng doanh thu</span>
   </div>
+
+  <div class="metric active">
+    <b id="monthlyRevenue">0</b>
+    <span>Doanh thu tháng</span>
+  </div>
+
+  <div class="metric stopped">
+    <b id="totalDebt">0</b>
+    <span>Học phí còn nợ</span>
+  </div>
+
+</div>
 
   <div id="tuitionFilterInfo"></div>
 
@@ -1233,11 +1248,12 @@ $("clearPaymentMonth")
       $("paymentMonthFilter").value = "";
 
       renderTuition();
-$("tuitionFilterInfo").textContent =
-  selectedMonth
-    ? `Đang xem tháng ${selectedMonth}`
-    : "Đang xem tất cả giao dịch";
-    }
+const info = $("tuitionFilterInfo");
+
+if(info){
+  info.textContent =
+    "Đang xem tất cả giao dịch";
+}
   );
     }
 
