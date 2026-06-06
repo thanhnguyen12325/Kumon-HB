@@ -982,7 +982,7 @@ textarea{
 <section id="tuitionView" class="view hidden">
 
   <div class="summary" id="tuitionSummary">
-    ...
+  
   </div>
 
   <div id="tuitionFilterInfo"></div>
@@ -1112,7 +1112,7 @@ async function setupCloud() {
 
     cloud = {
       db,
-      ...dbMod
+      dbMod
     };
 
     $("storageStatus").textContent =
@@ -1179,7 +1179,7 @@ function migratePaymentHistory(){
 
   students = students.map(student => ({
 
-    ...student,
+    student,
 
     paymentHistory:
       Array.isArray(student.paymentHistory)
@@ -1233,9 +1233,16 @@ $("clearPaymentMonth")
       $("paymentMonthFilter").value = "";
 
       renderTuition();
-$("tuitionFilterInfo").textContent =
-  "Đang xem tất cả giao dịch";
-    }
+const info = $("tuitionFilterInfo");
+
+if(info){
+
+  info.textContent =
+    selectedMonth
+      ? `Đang xem tháng ${selectedMonth}`
+      : "Đang xem tất cả giao dịch";
+
+}
   );
     }
 
@@ -1349,7 +1356,7 @@ englishTime2: fields.englishTime2.value.trim()
       const records = [];
       if (baseStudent.mathEnabled) {
         records.push({
-          ...baseStudent,
+          baseStudent,
           id: nextId(),
           mathEnabled: true,
           englishEnabled: false,
@@ -1361,7 +1368,7 @@ englishTime2: fields.englishTime2.value.trim()
       }
       if (baseStudent.englishEnabled) {
         records.push({
-          ...baseStudent,
+          baseStudent,
           id: nextId(),
           mathEnabled: false,
           mathStart: "",
@@ -1409,7 +1416,7 @@ englishTime2: fields.englishTime2.value.trim()
 
     async function toggleStatus(id) {
       students = students.map((student) => student.id === id ? {
-        ...student,
+        student,
         status: student.status === "dang hoc" ? "da nghi" : "dang hoc",
         updatedAt: new Date().toISOString()
       } : student);
@@ -2056,12 +2063,12 @@ students.forEach(student => {
   (student) =>
     student.id === id
       ? {
-          ...student,
+          student,
 
           paymentStatus: "da thanh toan",
 
           paymentHistory: [
-            ...(student.paymentHistory || []),
+            (student.paymentHistory || []),
             paymentDetails
           ],
 
