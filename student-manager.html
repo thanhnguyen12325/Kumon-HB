@@ -992,7 +992,25 @@ textarea{
   </div>
 
   <section class="panel">
-    <h2>Danh sách giao dịch</h2>
+    <div class="panel-header">
+
+  <h2>Danh sách giao dịch</h2>
+
+  <div class="toolbar">
+
+    <input
+      type="month"
+      id="paymentMonthFilter">
+
+    <button
+      type="button"
+      id="clearPaymentMonth">
+      Tất cả
+    </button>
+
+  </div>
+
+</div>
     <div class="body">
       <div id="paymentTable"></div>
     </div>
@@ -1187,6 +1205,26 @@ async function setupCloud() {
       $("clearConfig").addEventListener("click", clearFirebaseConfig);
       $("paymentForm").addEventListener("submit", submitPayment);
       $("cancelPayment").addEventListener("click", cancelPayment);
+      $("paymentMonthFilter")
+  ?.addEventListener(
+    "change",
+    renderTuition
+  );
+
+$("clearPaymentMonth")
+  ?.addEventListener(
+    "click",
+    () => {
+
+      $("paymentMonthFilter").value = "";
+
+      renderTuition();
+$("tuitionFilterInfo").textContent =
+  selectedMonth
+    ? `Đang xem tháng ${selectedMonth}`
+    : "Đang xem tất cả giao dịch";
+    }
+  );
     }
 
 function switchView(view) {
@@ -1604,11 +1642,42 @@ englishTime2: fields.englishTime2.value.trim()
       bindTableButtons();
     }
     function renderTuition(){
+const selectedMonth =
+  $("paymentMonthFilter")?.value || "";
+      let transactions =
+  students.filter(
+    s => s.paymentDetails
+  );
+      if(selectedMonth){
 
+  const [year,month] =
+    selectedMonth.split("-");
+
+  transactions =
+    transactions.filter(student => {
+
+      const date =
+        student.paymentDetails?.date;
+
+      if(!date) return false;
+
+      const parts =
+        date.split("/");
+
+      if(parts.length !== 3)
+        return false;
+
+      return (
+        Number(parts[1]) === Number(month)
+        &&
+        Number(parts[2]) === Number(year)
+      );
+
+    });
+
+}
   const paidStudents =
-    students.filter(
-      s => s.paymentDetails
-    );
+  transactions;
 
   const totalRevenue =
     paidStudents.reduce(
@@ -1670,14 +1739,13 @@ englishTime2: fields.englishTime2.value.trim()
   $("totalDebt").textContent =
     debt.length;
 
-  renderPaymentTable();
+  renderPaymentTable(
+  transactions
+);
 }
-    function renderPaymentTable(){
-
-  const rows =
-    students.filter(
-      s => s.paymentDetails
-    );
+    function renderPaymentTable(
+  rows = []
+){
 
   if(rows.length===0){
 
