@@ -2211,6 +2211,47 @@ students.forEach(student => {
       }[char]));
     }
   </script>
-   
+    <script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc
+}
+from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCYM6Dscm6b_hq0WZAqPSI2WNQu5NQaYag",
+  authDomain: "kumon-hiepbinh.firebaseapp.com",
+  projectId: "kumon-hiepbinh",
+  storageBucket: "kumon-hiepbinh.firebasestorage.app",
+  messagingSenderId: "1054668776327",
+  appId: "1:1054668776327:web:b3039eb62dffc48f56e922"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* đưa ra global để script hiện tại dùng được */
+window.db = db;
+window.firestoreApi = {
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc
+};
+
+console.log("🔥 Firestore connected");
+
+</script>
 </body>
 </html>
