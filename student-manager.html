@@ -1048,13 +1048,20 @@ englishTime2: $("englishTime2"),
 
     async function init() {
       await setupCloud();
-      students = await loadStudents();
+      students = await loadStudentsFromCloud();
       bindEvents();
       renderAll();
     }
 
     async function setupCloud() {
-      const saved = localStorage.getItem(CONFIG_KEY);
+      const config = {
+  apiKey: "AIzaSyCYM6Dscm6b_hq0WZAqPSI2WNQu5NQaYag",
+  authDomain: "kumon-hiepbinh.firebaseapp.com",
+  projectId: "kumon-hiepbinh",
+  storageBucket: "kumon-hiepbinh.firebasestorage.app",
+  messagingSenderId: "1054668776327",
+  appId: "1:1054668776327:web:b3039eb62dffc48f56e922"
+};
       $("firebaseConfig").value = saved || "";
       if (!saved) {
         $("storageStatus").textContent = "Local database";
@@ -1065,7 +1072,8 @@ englishTime2: $("englishTime2"),
         const config = JSON.parse(saved);
         const appMod = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js");
         const dbMod = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js");
-        const app = appMod.initializeApp(config);
+        const app =
+  appMod.initializeApp(config);
         const db = dbMod.getFirestore(app);
         cloud = { db, ...dbMod };
         $("storageStatus").textContent = "Firestore online";
@@ -1076,7 +1084,70 @@ englishTime2: $("englishTime2"),
         alert("Chưa kết nối được Firebase. Ứng dụng đang dùng local database.");
       }
     }
+async function loadStudentsFromCloud() {
 
+  const snapshot =
+    await window.firestoreApi.getDocs(
+      window.firestoreApi.collection(
+        window.db,
+        "students"
+      )
+    );
+
+  return snapshot.docs.map(d => ({
+    firestoreId: d.id,
+    ...d.data()
+  }));
+}
+
+}async function addStudentToCloud(student){
+
+  const docRef =
+    await window.firestoreApi.addDoc(
+      window.firestoreApi.collection(
+        window.db,
+        "students"
+      ),
+      student
+    );
+
+  student.firestoreId =
+    docRef.id;
+
+  return docRef.id;
+}
+    async function updateStudentInCloud(student){
+
+  const ref =
+    window.firestoreApi.doc(
+      window.db,
+      "students",
+      student.firestoreId
+    );
+
+  await window.firestoreApi.updateDoc(
+    ref,
+    student
+  );
+}
+    async function deleteStudentInCloud(id){
+
+  const student =
+    students.find(
+      x => x.id === id
+    );
+
+  if(!student?.firestoreId)
+    return;
+
+  await window.firestoreApi.deleteDoc(
+    window.firestoreApi.doc(
+      window.db,
+      "students",
+      student.firestoreId
+    )
+  );
+}
     async function loadStudents() {
       if (cloud) {
         const snap = await cloud.getDocs(cloud.collection(cloud.db, "students"));
