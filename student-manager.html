@@ -1068,11 +1068,18 @@ englishTime2: $("englishTime2"),
     await init();
 
     async function init() {
-      await setupCloud();
-      students = await loadStudents();
-      bindEvents();
-      renderAll();
-    }
+
+  await setupCloud();
+
+  students = await loadStudents();
+
+  migratePaymentHistory();
+
+  bindEvents();
+
+  renderAll();
+
+}
 
 async function setupCloud() {
 
@@ -1160,6 +1167,7 @@ async function setupCloud() {
           englishLevel: "Starter",
           paymentStatus: "chua thanh toan",
           paymentDetails: null,
+          paymentHistory: [],
           status: "dang hoc",
           notes: "Hoc thu 2 mon",
           createdAt: now,
@@ -1167,7 +1175,22 @@ async function setupCloud() {
         }
       ];
     }
+function migratePaymentHistory(){
 
+  students = students.map(student => ({
+
+    ...student,
+
+    paymentHistory:
+      Array.isArray(student.paymentHistory)
+        ? student.paymentHistory
+        : student.paymentDetails
+          ? [student.paymentDetails]
+          : []
+
+  }));
+
+}
     async function persist() {
       students.sort(sortByUpdated);
       if (cloud) {
@@ -1291,6 +1314,7 @@ renderAll();
         englishLevel: fields.englishLevel.value.trim(),
         paymentStatus: existing?.paymentStatus || "chua thanh toan",
         paymentDetails: existing?.paymentDetails || null,
+        paymentHistory:  existing?.paymentHistory || [],
         status: fields.status.value,
         notes: fields.notes.value.trim(),
         createdAt: existing?.createdAt || now,
@@ -1475,6 +1499,11 @@ englishTime2: fields.englishTime2.value.trim()
         englishLevel: row.englishLevel || row.englishlevel || row["trinh do tieng anh"] || row["trinh do bat dau tieng anh"] || "",
         paymentStatus: paymentDetails ? "da thanh toan" : normalizePayment(row.paymentStatus || row.paymentstatus || row["thanh toan"]),
         paymentDetails,
+
+paymentHistory:
+  paymentDetails
+    ? [paymentDetails]
+    : [],
         status: String(row.status || row["trang thai"] || "dang hoc").toLowerCase().includes("nghi") ? "da nghi" : "dang hoc",
         notes: row.notes || row["ghi chu"] || "",
         createdAt: now,
@@ -1637,20 +1666,31 @@ englishTime2: fields.englishTime2.value.trim()
     function renderTuition(){
 const selectedMonth =
   $("paymentMonthFilter")?.value || "";
-      let transactions =
-  students.filter(
-    s => s.paymentDetails
-  );
+      let transactions = [];
+
+students.forEach(student => {
+
+  (student.paymentHistory || [])
+    .forEach(payment => {
+
+      transactions.push({
+        student,
+        payment
+      });
+
+    });
+
+});
       if(selectedMonth){
 
   const [year,month] =
     selectedMonth.split("-");
 
   transactions =
-    transactions.filter(student => {
+    transactions.filter(({payment}) => {
 
       const date =
-        student.paymentDetails?.date;
+        payment.date;
 
       if(!date) return false;
 
@@ -1674,9 +1714,9 @@ const selectedMonth =
 
   const totalRevenue =
     paidStudents.reduce(
-      (sum,s)=>
+  (sum,{payment}) =>
         sum + Number(
-          (s.paymentDetails?.amount || "0")
+          (payment.amount || "0")
             .replace(/[^\d]/g,"")
         ),
       0
@@ -1767,7 +1807,7 @@ const selectedMonth =
 
       <tbody>
 
-        ${rows.map(student=>`
+        ${rows.map(({student,payment}) =>`
 
           <tr>
 
@@ -1775,13 +1815,13 @@ const selectedMonth =
 
             <td>${student.studentName}</td>
 
-            <td>${student.paymentDetails.date || ""}</td>
+            <td>${payment.date || ""}</td>
 
-            <td>${student.paymentDetails.amount || ""}</td>
+            <td>${payment.amount || ""}</td>
 
-            <td>${student.paymentDetails.method || ""}</td>
+            <td>${payment.method || ""}</td>
 
-            <td>${student.paymentDetails.promotion || ""}</td>
+            <td>${payment.promotion || ""}</td>
 
           </tr>
 
