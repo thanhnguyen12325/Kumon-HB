@@ -1217,8 +1217,6 @@ function migratePaymentHistory(){
       $("importButton").addEventListener("click", () => $("importFile").click());
       $("importFile").addEventListener("change", importFile);
       $("exportCsv").addEventListener("click", exportCsv);
-      $("saveConfig").addEventListener("click", saveFirebaseConfig);
-      $("clearConfig").addEventListener("click", clearFirebaseConfig);
       $("paymentForm").addEventListener("submit", submitPayment);
       $("cancelPayment").addEventListener("click", cancelPayment);
       $("paymentMonthFilter")
@@ -1236,9 +1234,7 @@ $("clearPaymentMonth")
 
       renderTuition();
 $("tuitionFilterInfo").textContent =
-  selectedMonth
-    ? `Đang xem tháng ${selectedMonth}`
-    : "Đang xem tất cả giao dịch";
+  "Đang xem tất cả giao dịch";
     }
   );
     }
