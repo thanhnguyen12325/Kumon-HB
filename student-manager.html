@@ -2016,12 +2016,25 @@ const selectedMonth =
         method: paymentFields.method.value,
         submittedAt: now
       };
-      students = students.map((student) => student.id === id ? {
-        ...student,
-        paymentStatus: "da thanh toan",
-        paymentDetails,
-        updatedAt: now
-      } : student);
+      students = students.map(
+  (student) =>
+    student.id === id
+      ? {
+          ...student,
+
+          paymentStatus: "da thanh toan",
+
+          paymentHistory: [
+            ...(student.paymentHistory || []),
+            paymentDetails
+          ],
+
+          paymentDetails,
+
+          updatedAt: now
+        }
+      : student
+);
       await persist();
       clearPaymentForm();
       switchView("list");
