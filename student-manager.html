@@ -701,8 +701,8 @@ textarea{
 👨‍🎓 Học sinh
 </button>
 
-<button data-view="settings">
-☁️ Cloud
+<button data-view="tuition">
+💰 Học phí
 </button>
     </nav>
 
@@ -972,24 +972,34 @@ textarea{
         </div>
       </section>
     </section>
+<section id="tuitionView" class="view hidden">
 
-    <section id="settingsView" class="view hidden">
-      <section class="panel">
-        <h2>Cấu hình Firebase Firestore</h2>
-        <div class="body">
-          <div class="notice">
-            Tạo Firebase project, bật Firestore Database, thêm Web App, rồi dán config JSON vào ô dưới. Sau khi lưu, tải lại trang để ứng dụng dùng database online.
-          </div>
-          <label>Firebase config JSON
-            <textarea id="firebaseConfig" style="min-height: 180px;" spellcheck="false" placeholder='{"apiKey":"...","authDomain":"...","projectId":"...","storageBucket":"...","messagingSenderId":"...","appId":"..."}'></textarea>
-          </label>
-          <div class="toolbar" style="margin-top: 12px;">
-            <button id="saveConfig" class="primary">Lưu cấu hình</button>
-            <button id="clearConfig">Dùng local database</button>
-          </div>
-        </div>
-      </section>
-    </section>
+  <div class="summary" id="tuitionSummary">
+    <div class="metric total">
+      <b id="totalRevenue">0</b>
+      <span>Tổng doanh thu</span>
+    </div>
+
+    <div class="metric active">
+      <b id="monthlyRevenue">0</b>
+      <span>Doanh thu tháng</span>
+    </div>
+
+    <div class="metric stopped">
+      <b id="totalDebt">0</b>
+      <span>Học phí còn nợ</span>
+    </div>
+  </div>
+
+  <section class="panel">
+    <h2>Danh sách giao dịch</h2>
+    <div class="body">
+      <div id="paymentTable"></div>
+    </div>
+  </section>
+
+</section>
+ 
   </main>
   </div>
 
@@ -1550,6 +1560,7 @@ englishTime2: fields.englishTime2.value.trim()
       renderRecent();
       renderDatabase();
       renderList();
+      renderTuition();
     }
 
     function renderSummary() {
@@ -1592,6 +1603,141 @@ englishTime2: fields.englishTime2.value.trim()
       $("studentList").innerHTML = tableFor(rows, false, "list");
       bindTableButtons();
     }
+    function renderTuition(){
+
+  const paidStudents =
+    students.filter(
+      s => s.paymentDetails
+    );
+
+  const totalRevenue =
+    paidStudents.reduce(
+      (sum,s)=>
+        sum + Number(
+          (s.paymentDetails?.amount || "0")
+            .replace(/[^\d]/g,"")
+        ),
+      0
+    );
+
+  const currentMonth =
+    new Date().getMonth() + 1;
+
+  const currentYear =
+    new Date().getFullYear();
+
+  const monthlyRevenue =
+    paidStudents
+      .filter(s=>{
+
+        const date =
+          s.paymentDetails?.date;
+
+        if(!date) return false;
+
+        const parts =
+          date.split("/");
+
+        if(parts.length!==3)
+          return false;
+
+        return (
+          Number(parts[1])===currentMonth &&
+          Number(parts[2])===currentYear
+        );
+
+      })
+      .reduce(
+        (sum,s)=>
+          sum + Number(
+            (s.paymentDetails?.amount || "0")
+              .replace(/[^\d]/g,"")
+          ),
+        0
+      );
+
+  const debt =
+    students.filter(
+      s => s.paymentStatus !== "da thanh toan"
+    );
+
+  $("totalRevenue").textContent =
+    formatCurrency(totalRevenue);
+
+  $("monthlyRevenue").textContent =
+    formatCurrency(monthlyRevenue);
+
+  $("totalDebt").textContent =
+    debt.length;
+
+  renderPaymentTable();
+}
+    function renderPaymentTable(){
+
+  const rows =
+    students.filter(
+      s => s.paymentDetails
+    );
+
+  if(rows.length===0){
+
+    $("paymentTable").innerHTML =
+      `<div class="empty">
+         Chưa có giao dịch
+       </div>`;
+
+    return;
+  }
+
+  $("paymentTable").innerHTML = `
+  <div class="table-wrap">
+    <table>
+
+      <thead>
+        <tr>
+          <th>Mã HS</th>
+          <th>Học sinh</th>
+          <th>Ngày</th>
+          <th>Số tiền</th>
+          <th>Phương thức</th>
+          <th>Khuyến mãi</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        ${rows.map(student=>`
+
+          <tr>
+
+            <td>${student.id}</td>
+
+            <td>${student.studentName}</td>
+
+            <td>${student.paymentDetails.date || ""}</td>
+
+            <td>${student.paymentDetails.amount || ""}</td>
+
+            <td>${student.paymentDetails.method || ""}</td>
+
+            <td>${student.paymentDetails.promotion || ""}</td>
+
+          </tr>
+
+        `).join("")}
+
+      </tbody>
+
+    </table>
+  </div>
+  `;
+}
+    function formatCurrency(value){
+
+  return Number(value)
+    .toLocaleString("vi-VN");
+
+}
 
     function filterStudents(query) {
       if (!query) return students;
