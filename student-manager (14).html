@@ -1,0 +1,3253 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quản lý học sinh Kumon Hiệp Bình</title>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #eef3f8;
+      --surface: #ffffff;
+      --surface-2: #f7fafc;
+      --ink: #17202a;
+      --muted: #627084;
+      --line: #d8e0ea;
+      --line-strong: #b9c6d6;
+      --blue: #1f6feb;
+      --blue-deep: #124fbb;
+      --teal: #0f766e;
+      --green: #15803d;
+      --red: #c24135;
+      --amber: #a16207;
+      --violet: #6d5bd0;
+      --shadow: 0 16px 42px rgba(24, 39, 75, .10);
+      --soft-shadow: 0 8px 22px rgba(24, 39, 75, .08);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      background:
+        radial-gradient(circle at 12% 0%, rgba(31, 111, 235, .13), transparent 28%),
+        linear-gradient(180deg, #f8fbff 0%, var(--bg) 360px, #f7f9fc 100%);
+      color: var(--ink);
+    }
+
+    .app-shell {
+      min-height: 100vh;
+    }
+
+    header{
+  background:
+    linear-gradient(
+      135deg,
+      #0f2f57 0%,
+      #1f6feb 50%,
+      #3f8cff 100%
+    );
+
+  padding:32px;
+  border:none;
+  box-shadow:
+    0 15px 40px rgba(31,111,235,.25);
+}
+
+    .topbar {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+    
+    .panel{
+  transition:.25s;
+}
+
+.panel:hover{
+  transform:translateY(-2px);
+}
+    .metric{
+  border-left:5px solid var(--blue);
+}
+
+    .student-card{
+  background:white;
+  border-radius:12px;
+  padding:16px;
+  box-shadow:0 4px 12px rgba(0,0,0,.08);
+}
+
+.payment-check,
+#checkAllPayments{
+  appearance:none;
+  width:22px;
+  height:22px;
+  border:2px solid #1f6feb;
+  border-radius:6px;
+  cursor:pointer;
+  position:relative;
+  background:#fff;
+}
+
+.payment-check:checked,
+#checkAllPayments:checked{
+  background:#1f6feb;
+}
+
+.payment-check:checked::after,
+#checkAllPayments:checked::after{
+  content:"✓";
+  color:#fff;
+  font-size:20px;
+  font-weight:bold;
+  position:absolute;
+  left:4px;
+  top:-1px;
+}
+    .brand{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  min-width:0;
+  width:100%;
+}
+
+.brand-mark{
+    width:100px;
+    height:100px;
+    overflow:hidden;
+    background:white;
+    border-radius:16px;
+    padding:8px;
+}
+
+.brand-mark img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    display:block;
+}
+
+    header h1{
+  margin:0;
+  font-size:32px;
+  font-weight:800;
+}
+
+    header p {
+      margin: 5px 0 0;
+      color: #d9e7f7;
+      font-size: 13px;
+      max-width: 760px;
+    }
+
+    main {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 18px 24px 32px;
+    }
+
+    nav{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+
+  background:white;
+
+  padding:12px;
+  border-radius:16px;
+
+  box-shadow:
+    0 6px 20px rgba(0,0,0,.08);
+
+  margin-bottom:20px;
+}
+
+    button, input, select, textarea { font: inherit; }
+
+    button {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--ink);
+      padding: 9px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      min-height: 38px;
+      font-weight: 700;
+      transition: transform .12s ease, border-color .12s ease, background .12s ease, box-shadow .12s ease;
+    }
+
+    button:hover {
+      border-color: var(--line-strong);
+      box-shadow: 0 4px 14px rgba(15, 23, 42, .08);
+      transform: translateY(-1px);
+    }
+
+    button.primary {
+      background: linear-gradient(180deg, var(--blue), var(--blue-deep));
+      border-color: var(--blue-deep);
+      color: white;
+      box-shadow: 0 8px 18px rgba(31, 111, 235, .24);
+    }
+
+    button.danger { background: #fff5f3; border-color: #f1b8b2; color: var(--red); }
+    button.ghost { background: transparent; }
+    button.active { background: #102a43; color: white; border-color: #102a43; }
+    button:disabled { cursor: not-allowed; opacity: .55; transform: none; }
+
+    nav button {
+      border-color: transparent;
+      background: transparent;
+      min-height: 36px;
+      white-space: nowrap;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 30px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      background: #e8f6ee;
+      color: var(--green);
+      white-space: nowrap;
+    }
+
+    .status::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .status.off { background: #fff6df; color: var(--amber); }
+    .status.db { background: #e8f1ff; color: var(--blue-deep); }
+    .status.paid { background: #e7f7ef; color: var(--green); }
+    .status.unpaid { background: #fff1e7; color: var(--amber); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(330px, 430px) minmax(0, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .panel{
+  background:white;
+  border:none;
+  border-radius:20px;
+  box-shadow:    0 10px 30px rgba(0,0,0,.08);
+  overflow:hidden;
+   width:100%;
+  max-width:100%;
+  overflow:hidden;
+}
+
+    .panel h2 {
+      margin: 0;
+      padding: 18px 18px 0;
+      font-size: 18px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .panel .body { padding: 18px; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 13px;
+    }
+
+    label {
+      display: grid;
+      gap: 7px;
+      color: #314156;
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      min-height: 40px;
+      padding: 9px 11px;
+      background: #ffffff;
+      color: var(--ink);
+      outline: none;
+      box-shadow: inset 0 1px 0 rgba(15, 23, 42, .03);
+    }
+    
+    
+
+    textarea {
+      min-height: 84px;
+      resize: vertical;
+      line-height: 1.45;
+    }
+
+    input::placeholder, textarea::placeholder { color: #98a4b3; }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(31, 111, 235, .14);
+    }
+
+    .span-2 { grid-column: 1 / -1; }
+
+    .subjects {
+      display: grid;
+      gap: 10px;
+      margin-top: 2px;
+    }
+
+    .subject-line {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 9px 10px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid #cfe0ef;
+      border-radius: 8px;
+      background: linear-gradient(180deg, #f9fcff, #f1f7fb);
+    }
+
+    .subject-line input[type="checkbox"], .row-check {
+      width: 18px;
+      height: 18px;
+      min-height: auto;
+      padding: 0;
+      accent-color: var(--blue);
+    }
+
+    .subject-line label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      background: rgba(255, 255, 255, .84);
+      border: 1px solid rgba(216, 224, 234, .9);
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: var(--soft-shadow);
+    }
+    
+    .panel-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:16px;
+  flex-wrap:wrap;
+  padding:18px 18px 0;
+}
+
+.panel-header h2{
+  margin:0;
+  padding:0;
+}
+
+.panel-header .toolbar{
+  margin:0;
+  flex:1;
+  justify-content:flex-end;
+}
+    .list-filters{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+.list-filters select{
+  min-width:180px;
+}
+
+    .panel .toolbar {
+      background: transparent;
+      border: 0;
+      box-shadow: none;
+      padding: 0;
+    }
+
+    .toolbar input[type="search"]{
+  width:100%;
+  max-width:390px;
+  min-width:0;
+}
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      max-height: 660px;
+      background: var(--surface);
+      box-shadow: var(--soft-shadow);
+      -webkit-overflow-scrolling:touch;
+    }
+
+    table {
+      width: 100%;
+      min-width: 900px;
+      border-collapse: separate;
+      border-spacing: 0;
+      background: white;
+    }
+    /* Danh sách học sinh */
+.student-address{
+    width:15%;
+    min-width:120px;
+    max-width:180px;
+
+    white-space:normal;
+    overflow-wrap:anywhere;
+}
+
+.student-subject{
+    width:15%;
+    min-width:200px;
+}
+
+    th, td {
+      padding: 12px 11px;
+      border-bottom: 1px solid #e7ecf2;
+      text-align: left;
+      vertical-align: top;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: #f4f7fb;
+      z-index: 1;
+      color: #475569;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .02em;
+      box-shadow: inset 0 -1px 0 var(--line);
+    }
+
+    td strong { color: #102a43; }
+    td small { color: var(--muted); }
+    tr:hover td { background: #fbfdff; }
+
+    .empty {
+      padding: 46px 16px;
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed var(--line-strong);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .78);
+    }
+
+    .actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      min-width: 154px;
+    }
+
+    .actions button {
+      min-height: 32px;
+      padding: 6px 9px;
+      font-size: 12px;
+      box-shadow: none;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(118px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .metric{
+  background:white;
+
+  border:none;
+
+  border-radius:18px;
+
+  padding:22px;
+
+  box-shadow:
+    0 10px 25px rgba(0,0,0,.08);
+
+  transition:.25s;
+}
+
+    .metric::after {
+      content: "";
+      position: absolute;
+      right: 12px;
+      top: 12px;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: var(--metric-bg, #eef4ff);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .45);
+    }
+
+    .metric b{
+  display:block;
+
+  font-size:42px;
+
+  font-weight:800;
+
+  color: var(--metric-color, var(--blue-deep));
+
+  margin-bottom:8px;
+}
+    
+.metric:hover{
+  transform:translateY(-4px);
+}
+
+    .metric span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .metric.total { --metric-color: #124fbb; --metric-bg: #e8f1ff; }
+    .metric.active { --metric-color: #0f766e; --metric-bg: #def7f3; }
+    .metric.math { --metric-color: #6d5bd0; --metric-bg: #efedff; }
+    .metric.english { --metric-color: #a16207; --metric-bg: #fff2cf; }
+    .metric.stopped { --metric-color: #c24135; --metric-bg: #ffe8e4; }
+
+    .notice {
+      border: 1px solid #b9d0ff;
+      background: linear-gradient(180deg, #f5f8ff, #edf4ff);
+      color: #183b8f;
+      padding: 13px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.55;
+      margin-bottom: 14px;
+      box-shadow: var(--soft-shadow);
+    }
+    #tuitionFilterInfo{
+  margin:12px 0 16px;
+  font-size:14px;
+  font-weight:600;
+  color:#1f6feb;
+}
+    .subject-card{
+
+  background:white;
+
+  border:2px solid #eaf2ff;
+
+  border-radius:18px;
+
+  padding:20px;
+
+  box-shadow:
+    0 5px 18px rgba(0,0,0,.04);
+}
+
+.subject-title{
+    font-size:16px;
+    font-weight:700;
+    color:#124fbb;
+    margin-bottom:12px;
+}
+
+.subject-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:12px;
+}
+
+.schedule-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+
+.subject-card input[type="time"]{
+    min-height:40px;
+}
+
+.subject-card select{
+    min-height:40px;
+}
+    .hidden { display: none !important; }
+
+    @media (max-width: 1120px) {
+      .summary { grid-template-columns: repeat(3, minmax(118px, 1fr)); }
+    }
+
+    @media (max-width:768px){
+.list-filters{
+  width:100%;
+  display:flex;
+  gap:8px;
+}
+  .student-address{
+      min-width:140px;
+      max-width:none;
+  }
+
+  .panel-header{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .panel-header .toolbar{
+    width:100%;
+    justify-content:flex-start;
+  }
+
+  .student-subject{
+      min-width:260px;
+  }
+
+.list-filters select{
+  flex:1;
+  min-width:0;
+}
+  header{
+    padding:18px;
+  }
+
+  .topbar{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .brand{
+    width:100%;
+  }
+
+  .grid{
+    grid-template-columns:1fr;
+  }
+
+  .form-grid{
+    grid-template-columns:1fr;
+  }
+
+  .subject-grid{
+    grid-template-columns:1fr;
+  }
+
+  .summary{
+    grid-template-columns:
+      repeat(2,minmax(0,1fr));
+  }
+
+  .span-2{
+    grid-column:auto;
+  }
+
+  nav{
+    width:100%;
+  }
+
+  nav button{
+    flex:1;
+    display:flex;
+align-items:center;
+justify-content:center;
+gap:6px;
+  }
+
+  .toolbar{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .toolbar input,
+  .toolbar select,
+  .toolbar button{
+    width:100%;
+    max-width:none;
+  }
+  *{
+  min-width:0;
+}
+
+.panel,
+.panel .body,
+.grid,
+.form-grid,
+.subject-grid{
+  width:100%;
+  max-width:100%;
+}
+
+label{
+  width:100%;
+}
+
+input,
+select,
+textarea{
+  width:100%;
+  max-width:100%;
+}
+
+.subject-card{
+  width:100%;
+}
+
+.brand{
+  min-width:0;
+}
+
+.topbar{
+  width:100%;
+}
+}
+
+    @media (max-width:600px){
+
+  .brand-mark{
+    width:70px;
+    height:70px;
+  }
+
+  header h1{
+    font-size:24px;
+  }
+
+  header p{
+    font-size:12px;
+  }
+
+  .metric b{
+    font-size:28px;
+  }
+
+  .metric{
+    padding:14px;
+  }
+
+  .summary{
+    grid-template-columns:1fr;
+  }
+
+  .subject-card{
+    padding:14px;
+  }
+
+  .subject-title{
+    font-size:15px;
+  }
+
+  main{
+    padding:10px;
+  }
+
+}
+
+    @media (max-width: 560px) {
+      .brand { align-items: flex-start; }
+      .brand-mark { width: 65px; height: 65px; }
+      header h1 { font-size: 20px; }
+      .summary { grid-template-columns: 1fr; }
+      .toolbar input[type="search"], .toolbar button, .toolbar select { width: 100%; max-width: none; }
+      nav button { flex: 1 1 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+  <header>
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark">
+  <img src="logo.png" alt="Kumon Hiệp Bình">
+</div>
+        <div>
+          <h1>Quản lý học sinh Kumon Hiệp Bình</h1>
+          <p>Đăng ký, tra cứu, chỉnh sửa, import Excel/CSV và lưu trữ online với Firebase Firestore.</p>
+        </div>
+      </div>
+      <span id="storageStatus" class="status">Local database</span>
+    </div>
+  </header>
+
+  <main>
+    <nav aria-label="Màn hình chính">
+      <button class="active" data-view="register">
+📝 Đăng ký
+</button>
+
+<button data-view="database">
+📚 Dữ liệu
+</button>
+
+<button data-view="list">
+👨‍🎓 Học sinh
+</button>
+
+<button data-view="tuition">
+💰 Học phí
+</button>
+    </nav>
+
+    <section id="registerView" class="view">
+      <div class="grid">
+        <section class="panel">
+          <h2 id="formTitle">Đăng ký thông tin học sinh</h2>
+          <div class="body">
+            <form id="studentForm">
+              <input type="hidden" id="editingId">
+              <div class="form-grid">
+                <label>Họ và tên học sinh
+                  <input id="studentName" required autocomplete="name">
+                </label>
+                <label>Ngày sinh
+                  <input id="birthDate" inputmode="numeric" placeholder="DD/MM/YYYY">
+                </label>
+                <label>Giới tính
+                  <select id="gender">
+                    <option value="">Chưa chọn</option>
+                    <option value="Nam">Nam</option>
+                    <option value="Nữ">Nữ</option>
+                    <option value="Khác">Khác</option>
+                  </select>
+                </label>
+                <label>Email
+                  <input id="email" type="email" autocomplete="email">
+                </label>
+                <label>Tên phụ huynh
+                  <input id="parentName" required>
+                </label>
+                <label>Số điện thoại phụ huynh
+                  <input id="parentPhone" required inputmode="tel">
+                </label>
+                <label class="span-2">Địa chỉ
+                  <textarea id="address" required></textarea>
+                </label>
+                <div class="span-2 subjects" aria-label="Môn học">
+                  <div class="subject-card">
+  <div class="subject-title">
+      📘 Môn Toán
+  </div>
+
+  <div class="subject-grid">
+                    <input id="mathEnabled" type="checkbox">
+                    <label for="mathEnabled">Môn Toán</label>
+                   <span></span>
+                    <label>Ngày bắt đầu Toán
+                      <input id="mathStart" inputmode="numeric" placeholder="DD/MM/YYYY">
+                    </label>
+                 
+                    <label>Trình độ bắt đầu Toán
+  <input id="mathLevel">
+</label>
+
+<label>Trình độ hiện tại Toán
+  <input id="mathCurrentLevel">
+</label>
+
+<label>Ngày học 1
+<select id="mathDay1">
+  <option value="">Chọn ngày</option>
+  <option>Thứ 2</option>
+  <option>Thứ 3</option>
+  <option>Thứ 4</option>
+  <option>Thứ 5</option>
+  <option>Thứ 6</option>
+  <option>Thứ 7</option>
+  <option>Chủ nhật</option>
+</select>
+</label>
+
+<label>Ngày học 2
+  <select id="mathDay2">
+  <option value="">Chọn ngày</option>
+  <option>Thứ 2</option>
+  <option>Thứ 3</option>
+  <option>Thứ 4</option>
+  <option>Thứ 5</option>
+  <option>Thứ 6</option>
+  <option>Thứ 7</option>
+  <option>Chủ nhật</option>
+</select>
+</label>
+
+<label>Giờ học 1
+  <input type="time" id="mathTime1">
+</label>
+
+<label>Giờ học 2
+  <input type="time" id="mathTime2">
+</label>
+                  </div>
+                  </div>
+
+                  <div class="subject-card">
+  <div class="subject-title">
+      📗 Môn Tiếng Anh
+  </div>
+
+  <div class="subject-grid">
+                    <input id="englishEnabled" type="checkbox">
+                    <label for="englishEnabled">Môn Tiếng Anh</label>
+                  <span></span>
+                    <label>Ngày bắt đầu Tiếng Anh
+                      <input id="englishStart" inputmode="numeric" placeholder="DD/MM/YYYY">
+                    </label>
+                    
+                    <label>Trình độ bắt đầu Tiếng Anh
+  <input id="englishLevel">
+</label>
+
+<label>Trình độ hiện tại Tiếng Anh
+  <input id="englishCurrentLevel">
+</label>
+
+<label>Ngày học 1
+  <select id="englishDay1">
+  <option value="">Chọn ngày</option>
+  <option>Thứ 2</option>
+  <option>Thứ 3</option>
+  <option>Thứ 4</option>
+  <option>Thứ 5</option>
+  <option>Thứ 6</option>
+  <option>Thứ 7</option>
+  <option>Chủ nhật</option>
+</select>
+</label>
+
+<label>Ngày học 2
+  <select id="englishDay2">
+  <option value="">Chọn ngày</option>
+  <option>Thứ 2</option>
+  <option>Thứ 3</option>
+  <option>Thứ 4</option>
+  <option>Thứ 5</option>
+  <option>Thứ 6</option>
+  <option>Thứ 7</option>
+  <option>Chủ nhật</option>
+</select>
+</label>
+
+<label>Giờ học 1
+  <input type="time" id="englishTime1">
+</label>
+
+<label>Giờ học 2
+  <input type="time" id="englishTime2">
+</label>
+                  </div>
+                </div>
+                </div>
+
+                <label>Trạng thái
+                  <select id="status">
+                    <option value="dang hoc">Đang học</option>
+                    <option value="da nghi">Đã nghỉ</option>
+                  </select>
+                </label>
+                <label>Ghi chú
+                  <input id="notes">
+                </label>
+              </div>
+              <div class="toolbar" style="margin: 16px 0 0;">
+                <button class="primary" type="submit">Lưu học sinh</button>
+                <button type="button" id="resetForm">Nhập mới</button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <section>
+          <div class="summary" id="summaryCards"></div>
+          <section class="panel">
+            <h2>Học sinh mới cập nhật</h2>
+            <div class="body">
+              <div id="recentStudents"></div>
+            </div>
+          </section>
+        </section>
+      </div>
+    </section>
+
+    <section id="databaseView" class="view hidden">
+      <div class="notice">
+        Backend hiện tại có thể lưu trên trình duyệt để dùng thử. Khi điền Firebase config, ứng dụng sẽ đọc/ghi vào Firestore online của Google Cloud. Chọn nhiều dòng để cập nhật trạng thái hoặc xóa nhanh.
+      </div>
+      <div class="toolbar">
+        <input id="dbSearch" type="search" placeholder="Tìm theo mã, tên, email, phụ huynh, địa chỉ...">
+        <select id="bulkStatus">
+          <option value="">Đổi trạng thái...</option>
+          <option value="dang hoc">Đang học</option>
+          <option value="da nghi">Đã nghỉ</option>
+        </select>
+        <button id="applyBulkStatus">Cập nhật đã chọn</button>
+        <button id="bulkDelete" class="danger">Xóa đã chọn</button>
+        <input id="importFile" class="hidden" type="file" accept=".xlsx,.xls,.csv">
+        <button id="importButton">Import Excel/CSV</button>
+        <button id="downloadTemplate">  📥 Tải file mẫu </button>
+        <button id="exportCsv">Xuất CSV</button>
+      </div>
+      <div id="databaseTable"></div>
+    </section>
+
+    <section id="listView" class="view hidden">
+      <div class="toolbar">
+        <input
+  id="listSearch"
+  type="search"
+  placeholder="Tìm học sinh..."
+>
+
+<div class="list-filters">
+
+  <select id="statusFilter">
+    <option value="">Tất cả trạng thái</option>
+    <option value="dang hoc">Đang học</option>
+    <option value="da nghi">Đã nghỉ</option>
+  </select>
+
+  <select id="paymentStatusFilter">
+    <option value="">Tất cả học phí</option>
+    <option value="da thanh toan">Đã thanh toán</option>
+    <option value="chua thanh toan">Chưa thanh toán</option>
+    <option value="tre hoc phi">Trễ học phí</option>
+  </select>
+
+</div>
+      </div>
+      <div id="studentList"></div>
+    </section>
+
+    <section id="paymentView" class="view hidden">
+      <section class="panel">
+        <h2>Thanh toán học phí</h2>
+        <div class="body">
+          <div class="notice" id="paymentStudentInfo">Chọn học sinh từ trang Danh sách để tạo thanh toán.</div>
+          <form id="paymentForm">
+            <input type="hidden" id="paymentStudentId">
+            <div class="form-grid">
+              <label>Số tiền thanh toán
+                <input id="paymentAmount" inputmode="numeric" required placeholder="Ví dụ: 2500000">
+              </label>
+              <label>Chương trình khuyến mãi
+                <input id="paymentPromotion" placeholder="Ví dụ: Giảm 10%, học thử...">
+              </label>
+              <label>Ngày thanh toán
+                <input id="paymentDate" inputmode="numeric" required placeholder="DD/MM/YYYY">
+              </label>
+              <label>Tháng học phí
+
+  <input
+    type="month"
+    id="paymentMonth">
+
+</label>
+              <label>Phương thức thanh toán
+                <select id="paymentMethod" required>
+                  <option value="Chuyển khoản">Chuyển khoản</option>
+                  <option value="Tiền mặt">Tiền mặt</option>
+                  <option value="Quẹt thẻ">Quẹt thẻ</option>
+                </select>
+              </label>
+              <div class="span-2 subjects" aria-label="Môn học thanh toán">
+                <div class="subject-line">
+                  <input id="payMath" type="checkbox" value="Toán">
+                  <label for="payMath">Toán</label>
+                </div>
+                <div class="subject-line">
+                  <input id="payEnglish" type="checkbox" value="Tiếng Anh">
+                  <label for="payEnglish">Tiếng Anh</label>
+                </div>
+                <div class="subject-line">
+                  <input id="payEnrollFee" type="checkbox" value="Phí Nhập Học">
+                  <label for="payEnrollFee">Phí Nhập Học</label>
+                </div>
+                <div class="subject-line">
+                  <input id="payHalfMonth" type="checkbox" value="Phí nửa tháng">
+                  <label for="payHalfMonth">Phí nửa tháng</label>
+                </div>
+              </div>
+              <label class="span-2">Ghi chú thanh toán
+                <textarea id="paymentNote"></textarea>
+              </label>
+            </div>
+            <div class="toolbar" style="margin: 16px 0 0;">
+              <button class="primary" type="submit">Gửi thanh toán</button>
+              <button type="button" id="cancelPayment">Hủy bỏ</button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </section>
+<section id="tuitionView" class="view hidden">
+
+  <div class="summary" id="tuitionSummary">
+
+  <div class="metric total">
+    <b id="totalRevenue">0</b>
+    <span>Tổng doanh thu</span>
+  </div>
+
+  <div class="metric active">
+    <b id="monthlyRevenue">0</b>
+    <span>Doanh thu tháng</span>
+  </div>
+
+  <div class="metric stopped">
+    <b id="totalDebt">0</b>
+    <span>Học phí còn nợ</span>
+  </div>
+
+</div>
+
+  <div id="tuitionFilterInfo"></div>
+
+  <section class="panel">
+
+    <div class="panel-header">
+      <h2>Danh sách giao dịch Học Phí</h2>
+
+      <div class="toolbar">
+        <input type="month" id="paymentMonthFilter">
+        
+
+        <button
+          type="button"
+          id="clearPaymentMonth">
+          Tất cả
+        </button>
+        <button
+  type="button"
+  id="exportPaymentExcel">
+  📊 Xuất Excel
+</button>
+
+<button
+  id="resetRevenueMonth"
+  class="danger">
+  🗑 Xóa doanh thu tháng
+</button>
+
+      </div>
+    </div>
+
+    <div class="body">
+      <div id="paymentTable"></div>
+    </div>
+
+  </section>
+
+</section>
+ <div
+  id="receiptModal"
+  class="hidden"
+  style="
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.45);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:9999;
+  "
+>
+  <div
+    style="
+      background:white;
+      width:420px;
+      max-width:90%;
+      border-radius:16px;
+      padding:24px;
+    "
+  >
+
+    <h3>
+      Thanh toán thành công
+    </h3>
+
+    <p>
+      Bạn muốn thực hiện bước tiếp theo?
+    </p>
+
+    <div
+      style="
+        display:flex;
+        gap:12px;
+        margin-top:20px;
+      "
+    >
+
+      <button
+        class="primary"
+        id="createReceiptBtn">
+        🖨 Tạo Phiếu Thu
+      </button>
+
+      <button
+        id="finishPaymentBtn">
+        ✓ Hoàn tất
+      </button>
+
+    </div>
+
+  </div>
+</div>
+  </main>
+  </div>
+
+  <script type="module">
+    const STORAGE_KEY = "student-manager.records.v1";
+    const CONFIG_KEY = "student-manager.firebaseConfig.v1";
+    const selectedIds = new Set();
+    const DATABASE_PASSWORD = "2026";
+let databaseUnlocked = false;
+    let students = [];
+    let cloud = null;
+    let activePaymentStudentId = "";
+    let lastPayment = null;
+
+    const $ = (id) => document.getElementById(id);
+    const fields = {
+        mathCurrentLevel: $("mathCurrentLevel"),
+mathDay1: $("mathDay1"),
+mathDay2: $("mathDay2"),
+mathTime1: $("mathTime1"),
+mathTime2: $("mathTime2"),
+
+englishCurrentLevel: $("englishCurrentLevel"),
+englishDay1: $("englishDay1"),
+englishDay2: $("englishDay2"),
+englishTime1: $("englishTime1"),
+englishTime2: $("englishTime2"),
+      editingId: $("editingId"),
+      studentName: $("studentName"),
+      birthDate: $("birthDate"),
+      gender: $("gender"),
+      email: $("email"),
+      parentName: $("parentName"),
+      parentPhone: $("parentPhone"),
+      address: $("address"),
+      mathEnabled: $("mathEnabled"),
+      mathStart: $("mathStart"),
+      mathLevel: $("mathLevel"),
+      englishEnabled: $("englishEnabled"),
+      englishStart: $("englishStart"),
+      englishLevel: $("englishLevel"),
+      status: $("status"),
+      notes: $("notes")
+    };
+
+    const paymentFields = {
+      studentId: $("paymentStudentId"),
+      amount: $("paymentAmount"),
+      promotion: $("paymentPromotion"),
+      date: $("paymentDate"),
+      month: $("paymentMonth"),
+      method: $("paymentMethod"),
+      note: $("paymentNote"),
+      items: [$("payMath"), $("payEnglish"), $("payEnrollFee"), $("payHalfMonth")]
+    };
+
+    await init();
+
+    async function init() {
+
+  await setupCloud();
+students = await loadStudents();
+
+migratePaymentHistory();
+
+processMonthlyPaymentStatus();
+
+bindEvents();
+
+renderAll();
+}
+
+async function setupCloud() {
+
+  try {
+
+    const config = {
+      apiKey: "AIzaSyCYM6Dscm6b_hq0WZAqPSI2WNQu5NQaYag",
+      authDomain: "kumon-hiepbinh.firebaseapp.com",
+      projectId: "kumon-hiepbinh",
+      storageBucket: "kumon-hiepbinh.firebasestorage.app",
+      messagingSenderId: "1054668776327",
+      appId: "1:1054668776327:web:b3039eb62dffc48f56e922"
+    };
+
+    const appMod =
+      await import(
+        "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js"
+      );
+
+    const dbMod =
+      await import(
+        "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js"
+      );
+
+    const app =
+      appMod.initializeApp(config);
+
+    const db =
+      dbMod.getFirestore(app);
+
+    cloud = {
+      db,
+      ...dbMod
+    };
+
+    $("storageStatus").textContent =
+      "Firestore online";
+
+    $("storageStatus").className =
+      "status db";
+
+    console.log("🔥 Firestore connected");
+
+  }
+  catch(error){
+
+    console.error(error);
+
+    $("storageStatus").textContent =
+      "Local database";
+
+    $("storageStatus").className =
+      "status local";
+
+    alert(
+      "Không kết nối được Firestore. Hệ thống chuyển sang Local Database."
+    );
+  }
+
+}
+    async function loadStudents() {
+      if (cloud) {
+        const snap = await cloud.getDocs(cloud.collection(cloud.db, "students"));
+        return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() })).sort(sortByUpdated);
+      }
+
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return JSON.parse(raw).sort(sortByUpdated);
+      const now = new Date().toISOString();
+      return [
+        {
+          id: "KHB-2026-0001",
+          studentName: "Nguyen Minh Anh",
+          birthDate: "12/04/2015",
+          gender: "Nữ",
+          email: "minhanh@example.com",
+          parentName: "Nguyen Van An",
+          parentPhone: "0901234567",
+          address: "Quan 1, TP. Ho Chi Minh",
+          mathEnabled: true,
+          mathStart: "10/06/2026",
+          mathLevel: "Lớp 5 - cần củng cố",
+          englishEnabled: true,
+          englishStart: "12/06/2026",
+          englishLevel: "Starter",
+          paymentStatus: "chua thanh toan",
+          paymentDetails: null,
+          paymentHistory: [],
+          status: "dang hoc",
+          notes: "Hoc thu 2 mon",
+          createdAt: now,
+          updatedAt: now
+        }
+      ];
+    }
+    
+   async function resetRevenueMonth(){
+
+  const month = prompt(
+    "Nhập tháng cần xóa (YYYY-MM)\nVí dụ: 2026-06"
+  );
+
+  if(!month){
+    return;
+  }
+
+  if(
+    !/^\d{4}-\d{2}$/.test(month)
+  ){
+    alert(
+      "Định dạng phải là YYYY-MM"
+    );
+    return;
+  }
+
+  const count =
+    students.reduce(
+      (total, student) =>
+
+        total +
+        (student.paymentHistory || [])
+          .filter(
+            payment =>
+              (payment.tuitionMonth || "")
+              === month
+          )
+          .length,
+
+      0
+    );
+
+  if(count === 0){
+
+    alert(
+      `Không có giao dịch nào trong tháng ${month}`
+    );
+
+    return;
+  }
+
+  if(
+    !confirm(
+      `Xóa ${count} giao dịch của tháng ${month}?`
+    )
+  ){
+    return;
+  }
+
+  students.forEach(student => {
+
+    student.paymentHistory =
+      (student.paymentHistory || [])
+      .filter(
+        payment =>
+          (payment.tuitionMonth || "")
+          !== month
+      );
+
+  });
+    recalculatePaymentStatus();
+
+  await persist();
+
+  renderAll();
+
+  alert(
+    `Đã xóa ${count} giao dịch tháng ${month}`
+  );
+
+}
+    
+    function processMonthlyPaymentStatus() {
+
+  const today = new Date();
+
+  const day = today.getDate();
+
+  if (day !== 28) {
+    return;
+  }
+
+  const currentMonth =
+    `${today.getFullYear()}-${today.getMonth() + 1}`;
+
+  const processedMonth =
+    localStorage.getItem(
+      "kumonPaymentCycle"
+    );
+
+  if (processedMonth === currentMonth) {
+    return;
+  }
+
+  students = students.map(student => {
+
+    let newStatus =
+      student.paymentStatus;
+
+    if (
+      student.paymentStatus ===
+      "da thanh toan"
+    ) {
+
+      newStatus =
+        "chua thanh toan";
+
+    } else if (
+      student.paymentStatus ===
+      "chua thanh toan"
+    ) {
+
+      newStatus =
+        "tre hoc phi";
+
+    }
+
+    return {
+      ...student,
+      paymentStatus: newStatus
+    };
+
+  });
+
+  persist();
+
+  localStorage.setItem(
+    "kumonPaymentCycle",
+    currentMonth
+  );
+
+}
+    
+function migratePaymentHistory(){
+
+  students = students.map(student => ({
+
+    ...student,
+
+    paymentHistory:
+      Array.isArray(student.paymentHistory)
+        ? student.paymentHistory
+        : student.paymentDetails
+          ? [student.paymentDetails]
+          : []
+
+  }));
+students.forEach(student => {
+
+  (student.paymentHistory || [])
+    .forEach(payment => {
+
+      if (!payment.id) {
+        payment.id = crypto.randomUUID();
+      }
+
+    });
+
+});
+}
+    async function persist() {
+      students.sort(sortByUpdated);
+      if (cloud) {
+        await Promise.all(students.map((student) =>
+          cloud.setDoc(cloud.doc(cloud.db, "students", student.id), student, { merge: true })
+        ));
+        return;
+      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(students));
+    }
+
+    function bindEvents() {
+      document.querySelectorAll("nav button").forEach((button) => {
+        button.addEventListener("click", () => switchView(button.dataset.view));
+      });
+
+      $("studentForm").addEventListener("submit", saveStudent);
+      $("resetForm").addEventListener("click", clearForm);
+      $("dbSearch").addEventListener("input", renderDatabase);
+      $("listSearch").addEventListener("input", renderList);
+      $("statusFilter").addEventListener("change", renderList);
+      $("paymentStatusFilter")  ?.addEventListener("change", renderList );
+      $("applyBulkStatus").addEventListener("click", applyBulkStatus);
+      $("bulkDelete").addEventListener("click", deleteSelected);
+      $("importButton").addEventListener("click", () => $("importFile").click());
+      $("importFile").addEventListener("change", importFile);
+      $("exportCsv").addEventListener("click", exportCsv);
+      $("paymentForm").addEventListener("submit", submitPayment);
+      $("cancelPayment").addEventListener("click", cancelPayment);
+      
+$("finishPaymentBtn")
+?.addEventListener(
+  "click",
+  () => {
+
+    closeReceiptModal();
+
+    clearPaymentForm();
+
+    switchView("list");
+
+  }
+);
+
+$("createReceiptBtn")
+?.addEventListener(
+  "click",
+  printReceipt
+);
+
+      $("downloadTemplate")
+  ?.addEventListener(
+    "click",
+    () => {
+      window.open(
+        "Kumon_Import_Template.xlsx",
+        "_blank"
+      );
+    }
+  );
+      $("exportPaymentExcel")
+  ?.addEventListener(
+    "click",
+    exportPaymentExcel
+  );
+  $("deletePayments")
+  ?.addEventListener(
+    "click",
+    deleteSelectedPayments
+  );
+  $("resetRevenueMonth")
+  ?.addEventListener(
+    "click",
+    resetRevenueMonth
+  );
+      $("paymentMonthFilter")
+  ?.addEventListener(
+    "change",
+    renderTuition
+  );
+
+$("clearPaymentMonth")
+  ?.addEventListener(
+    "click",
+    () => {
+
+      $("paymentMonthFilter").value = "";
+
+      renderTuition();
+const info = $("tuitionFilterInfo");
+
+if(info){
+  info.textContent =
+    "Đang xem tất cả giao dịch";
+    }
+    }
+  );
+    }
+
+function switchView(view) {
+
+console.log("View:", view);
+
+if (view === "database") {
+
+
+const password = prompt(
+  "🔒 Nhập mật khẩu để truy cập dữ liệu học sinh"
+);
+
+if (password === null) {
+  return;
+}
+
+if (password !== DATABASE_PASSWORD) {
+  alert("Mật khẩu không chính xác");
+  return;
+
+}
+}
+
+document.querySelectorAll("nav button")
+.forEach((button) =>
+button.classList.toggle(
+"active",
+button.dataset.view === view
+)
+);
+
+document.querySelectorAll(".view")
+.forEach((section) =>
+section.classList.add("hidden")
+);
+
+const target = document.getElementById(`${view}View`);
+
+if (!target) {
+alert(`${view}View không tồn tại`);
+return;
+}
+
+target.classList.remove("hidden");
+
+renderAll();
+}
+
+
+    async function saveStudent(event) {
+      event.preventDefault();
+      const editingId = fields.editingId.value;
+      const id = editingId || nextStudentId();
+      const existing = students.find((student) => student.id === id);
+      const now = new Date().toISOString();
+      const baseStudent = {
+        id,
+        studentName: fields.studentName.value.trim(),
+        birthDate: normalizeDateInput(fields.birthDate.value),
+        gender: fields.gender.value,
+        email: fields.email.value.trim(),
+        parentName: fields.parentName.value.trim(),
+        parentPhone: fields.parentPhone.value.trim(),
+        address: fields.address.value.trim(),
+        mathEnabled: fields.mathEnabled.checked,
+        mathStart: normalizeDateInput(fields.mathStart.value),
+        mathLevel: fields.mathLevel.value.trim(),
+        englishEnabled: fields.englishEnabled.checked,
+        englishStart: normalizeDateInput(fields.englishStart.value),
+        englishLevel: fields.englishLevel.value.trim(),
+        paymentStatus: existing?.paymentStatus || "chua thanh toan",
+        paymentDetails: existing?.paymentDetails || null,
+        paymentHistory:  existing?.paymentHistory || [],
+        status: fields.status.value,
+        notes: fields.notes.value.trim(),
+        createdAt: existing?.createdAt || now,
+        updatedAt: now,
+        mathCurrentLevel: fields.mathCurrentLevel.value.trim(),
+mathDay1: fields.mathDay1.value.trim(),
+mathDay2: fields.mathDay2.value.trim(),
+mathTime1: fields.mathTime1.value.trim(),
+mathTime2: fields.mathTime2.value.trim(),
+
+englishCurrentLevel: fields.englishCurrentLevel.value.trim(),
+englishDay1: fields.englishDay1.value.trim(),
+englishDay2: fields.englishDay2.value.trim(),
+englishTime1: fields.englishTime1.value.trim(),
+englishTime2: fields.englishTime2.value.trim()
+      };
+
+      if (!baseStudent.mathEnabled && !baseStudent.englishEnabled) {
+        alert("Vui lòng chọn ít nhất một môn học.");
+        return;
+      }
+
+      if (existing) {
+        students = students.map((item) => item.id === id ? baseStudent : item);
+      } else {
+        students = [...createSubjectRecords(baseStudent, now), ...students];
+      }
+      await persist();
+      clearForm();
+      renderAll();
+      switchView("database");
+    }
+
+    function createSubjectRecords(baseStudent, now) {
+      const nextId = makeImportIdGenerator();
+      const records = [];
+      if (baseStudent.mathEnabled) {
+        records.push({
+          ...baseStudent,
+          id: nextId(),
+          mathEnabled: true,
+          englishEnabled: false,
+          englishStart: "",
+          englishLevel: "",
+          createdAt: now,
+          updatedAt: now
+        });
+      }
+      if (baseStudent.englishEnabled) {
+        records.push({
+          ...baseStudent,
+          id: nextId(),
+          mathEnabled: false,
+          mathStart: "",
+          mathLevel: "",
+          englishEnabled: true,
+          createdAt: now,
+          updatedAt: now
+        });
+      }
+      return records;
+    }
+
+    function nextStudentId() {
+      const year = new Date().getFullYear();
+      const max = students
+        .map((student) => student.id.match(/KHB-\d{4}-(\d+)/)?.[1])
+        .filter(Boolean)
+        .map(Number)
+        .reduce((highest, value) => Math.max(highest, value), 0);
+      return `KHB-${year}-${String(max + 1).padStart(4, "0")}`;
+    }
+
+    function clearForm() {
+      $("studentForm").reset();
+      fields.editingId.value = "";
+      fields.status.value = "dang hoc";
+      $("formTitle").textContent = "Đăng ký thông tin học sinh";
+    }
+    
+    async function deleteSelectedPayments(){
+
+  const selected =
+    [...document.querySelectorAll(
+      ".payment-check:checked"
+    )]
+    .map(cb => cb.value);
+
+  if(
+    !selected.length
+  ){
+    return;
+  }
+
+  students.forEach(student => {
+
+  student.paymentHistory =
+    (student.paymentHistory || [])
+      .filter(
+        payment =>
+          !selected.includes(payment.id)
+      );
+
+});
+
+recalculatePaymentStatus();
+
+await persist();
+
+renderAll();
+
+}
+
+    function editStudent(id) {
+      const student = students.find((item) => item.id === id);
+      if (!student) return;
+      Object.entries(fields).forEach(([key, input]) => {
+        if (input.type === "checkbox") input.checked = Boolean(student[key]);
+        else input.value = student[key] || "";
+      });
+      fields.editingId.value = student.id;
+      fields.birthDate.value =
+  student.birthDate || "";
+      fields.mathStart.value = toDateInput(student.mathStart);
+      fields.englishStart.value = toDateInput(student.englishStart);
+      $("formTitle").textContent = `Sửa thông tin ${student.id}`;
+      switchView("register");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    async function setStudentInactive(id) {
+
+  const student =
+    students.find(
+      s => s.id === id
+    );
+
+  if (!student) return;
+
+  if (
+    !confirm(
+      `Chuyển ${student.studentName} sang trạng thái Đã nghỉ?`
+    )
+  ) {
+    return;
+  }
+
+  students = students.map(student =>
+
+    student.id === id
+      ? {
+          ...student,
+          status: "da nghi",
+          updatedAt:
+            new Date().toISOString()
+        }
+      : student
+
+  );
+
+  await persist();
+
+  renderAll();
+
+}
+
+    async function deleteStudent(id) {
+      if (!confirm("Xóa học sinh này?")) return;
+      students = students.filter((student) => student.id !== id);
+      selectedIds.delete(id);
+      if (cloud) await cloud.deleteDoc(cloud.doc(cloud.db, "students", id));
+      await persist();
+      renderAll();
+    }
+
+    async function applyBulkStatus() {
+      const status = $("bulkStatus").value;
+      if (!status || selectedIds.size === 0) return;
+      const now = new Date().toISOString();
+      students = students.map((student) => selectedIds.has(student.id) ? { ...student, status, updatedAt: now } : student);
+      await persist();
+      renderAll();
+    }
+
+    async function deleteSelected() {
+      if (selectedIds.size === 0) return;
+      if (!confirm(`Xóa ${selectedIds.size} học sinh đã chọn?`)) return;
+      const ids = [...selectedIds];
+      students = students.filter((student) => !selectedIds.has(student.id));
+      if (cloud) await Promise.all(ids.map((id) => cloud.deleteDoc(cloud.doc(cloud.db, "students", id))));
+      selectedIds.clear();
+      await persist();
+      renderAll();
+    }
+
+    async function importFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const buffer = await file.arrayBuffer();
+      let rows = [];
+
+      if (file.name.toLowerCase().endsWith(".csv")) {
+        rows = parseCsv(new TextDecoder("utf-8").decode(buffer));
+      } else if (window.XLSX) {
+        const workbook = XLSX.read(buffer);
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+      } else {
+        alert("Cần có Internet để tải thư viện đọc Excel. Bạn có thể import file CSV ngay bây giờ.");
+        return;
+      }
+
+      const now = new Date().toISOString();
+      const nextImportId = makeImportIdGenerator();
+      let created = 0;
+let updated = 0;
+let skipped = 0;
+let errors = [];
+
+const imported = rows
+  .map(normalizeRowKeys)
+  .filter(row =>
+    Object.values(row)
+      .some(value =>
+        String(value).trim()
+      )
+  );
+
+for (const row of imported) {
+
+  const student =
+    normalizeImportedRow(
+      row,
+      now,
+      nextImportId
+    );
+
+  if (!student.studentName) {
+
+    errors.push(
+      "Thiếu tên học sinh"
+    );
+
+    skipped++;
+
+    continue;
+  }
+
+  const existingIndex =
+    students.findIndex(
+      s => s.id === student.id
+    );
+
+  if (existingIndex >= 0) {
+
+    students[existingIndex] = {
+
+      ...students[existingIndex],
+
+      ...student,
+
+      paymentHistory:
+        students[existingIndex]
+          .paymentHistory || [],
+
+      updatedAt: now
+
+    };
+
+    updated++;
+
+  } else {
+
+    students.unshift(student);
+
+    created++;
+
+  }
+
+}
+
+await persist();
+
+event.target.value = "";
+
+renderAll();
+
+alert(
+
+`Import hoàn tất
+
+Mới: ${created}
+
+Cập nhật: ${updated}
+
+Bỏ qua: ${skipped}`
+
+);
+
+if (errors.length) {
+
+  console.warn(errors);
+
+}
+    }
+
+    function normalizeImportedRow(row, now, nextImportId) {
+      const paymentDetails = normalizePaymentDetails(row, now);
+      return {
+        id:
+  row.id ||
+  row.studentCode ||
+  generateStudentCode(),
+        studentName: row.studentName || row.studentname || row.ten || row["ho ten"] || row["ho va ten hoc sinh"] || "",
+        birthDate: normalizeDateInput(row.birthDate || row.birthdate || row["ngay sinh"]),
+        gender: normalizeGender(row.gender || row["gioi tinh"]),
+        email: row.email || "",
+        parentName: row.parentName || row.parentname || row["phu huynh"] || row["ten phu huynh"] || "",
+        parentPhone: row.parentPhone || row.parentphone || row["sdt phu huynh"] || "",
+        address: row.address || row["dia chi"] || "",
+        mathEnabled: yes(row.mathEnabled || row.mathenabled || row.toan || row["mon toan"]),
+        mathStart: toDateInput(row.mathStart || row.mathstart || row["ngay bat dau toan"]),
+        mathLevel: row.mathLevel || row.mathlevel || row["trinh do toan"] || row["trinh do bat dau toan"] || "",
+        englishEnabled: yes(row.englishEnabled || row.englishenabled || row.english || row["tieng anh"] || row["mon tieng anh"]),
+        englishStart: toDateInput(row.englishStart || row.englishstart || row["ngay bat dau tieng anh"]),
+        englishLevel: row.englishLevel || row.englishlevel || row["trinh do tieng anh"] || row["trinh do bat dau tieng anh"] || "",
+        mathCurrentLevel:
+  row.mathcurrentlevel ||
+  row.mathCurrentLevel ||
+  row["trinh do hien tai toan"] ||
+  "",
+
+mathDay1:
+  row.mathday1 ||
+  row.mathDay1 ||
+  row["ngay hoc 1 toan"] ||
+  "",
+
+mathDay2:
+  row.mathday2 ||
+  row.mathDay2 ||
+  row["ngay hoc 2 toan"] ||
+  "",
+
+mathTime1:normalizeExcelTime(
+  row.mathtime1 ||
+  row.mathTime1 ||
+  row["gio hoc 1 toan"] ||
+  ""),
+
+mathTime2:normalizeExcelTime(
+  row.mathtime2 ||
+  row.mathTime2 ||
+  row["gio hoc 2 toan"] ||
+  ""),
+
+englishCurrentLevel:
+  row.englishcurrentlevel ||
+  row.englishCurrentLevel ||
+  row["trinh do hien tai tieng anh"] ||
+  "",
+
+englishDay1:
+  row.englishday1 ||
+  row.englishDay1 ||
+  row["ngay hoc 1 tieng anh"] ||
+  "",
+
+englishDay2:
+  row.englishday2 ||
+  row.englishDay2 ||
+  row["ngay hoc 2 tieng anh"] ||
+  "",
+
+englishTime1:normalizeExcelTime(
+  row.englishtime1 ||
+  row.englishTime1 ||
+  row["gio hoc 1 tieng anh"] ||
+  ""),
+
+englishTime2:normalizeExcelTime(
+  row.englishtime2 ||
+  row.englishTime2 ||
+  row["gio hoc 2 tieng anh"] ||
+  ""),
+        paymentStatus:
+  "chua thanh toan",
+        paymentDetails:
+  null,
+
+paymentHistory:
+  paymentDetails
+    ? [paymentDetails]
+    : [],
+        status: String(row.status || row["trang thai"] || "dang hoc").toLowerCase().includes("nghi") ? "da nghi" : "dang hoc",
+        notes: row.notes || row["ghi chu"] || "",
+        createdAt: now,
+        updatedAt: now
+      };
+    }
+
+    function normalizePaymentDetails(row, now) {
+      const amount = row.paymentAmount || row.paymentamount || row["so tien thanh toan"];
+      const date = toDateInput(row.paymentDate || row.paymentdate || row["ngay thanh toan"]);
+      const method = row.paymentMethod || row.paymentmethod || row["phuong thuc thanh toan"];
+      const itemsText = row.paymentItems || row.paymentitems || row["mon hoc hoac loai phi"] || row["mon hoc"] || "";
+      const items = String(itemsText).split(/[|,;]/).map((item) => item.trim()).filter(Boolean);
+      const promotion = row.paymentPromotion || row.paymentpromotion || row["chuong trinh khuyen mai"] || "";
+      const note = row.paymentNote || row.paymentnote || row["ghi chu thanh toan"] || "";
+      if (!amount && !date && !method && items.length === 0 && !promotion && !note) return null;
+      return {
+        amount: amount || "",
+        promotion,
+        date,
+        items,
+        method: method || "Chuyển khoản",
+        note,
+        submittedAt: now
+      };
+    }
+    
+    function normalizeExcelTime(value){
+
+  if(
+    typeof value === "number" &&
+    value >= 0 &&
+    value < 1
+  ){
+
+    const totalMinutes =
+      Math.round(value * 24 * 60);
+
+    const hours =
+      Math.floor(totalMinutes / 60);
+
+    const minutes =
+      totalMinutes % 60;
+
+    return `${String(hours).padStart(2,"0")}:${String(minutes).padStart(2,"0")}`;
+  }
+
+  return String(value || "").trim();
+}
+
+    function makeImportIdGenerator() {
+      const year = new Date().getFullYear();
+      let max = students
+        .map((student) => student.id.match(/KHB-\d{4}-(\d+)/)?.[1])
+        .filter(Boolean)
+        .map(Number)
+        .reduce((highest, value) => Math.max(highest, value), 0);
+      return () => `KHB-${year}-${String(++max).padStart(4, "0")}`;
+    }
+
+    function normalizeRowKeys(row) {
+      return Object.fromEntries(Object.entries(row).map(([key, value]) => [normalizeKey(key), value]));
+    }
+
+    function normalizeKey(key) {
+      return String(key)
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replaceAll("_", " ");
+    }
+
+    function parseCsv(text) {
+      const lines = text.trim().split(/\r?\n/);
+      const headers = splitCsvLine(lines.shift()).map((header) => header.trim());
+      return lines.map((line) => Object.fromEntries(splitCsvLine(line).map((value, index) => [headers[index], value.trim()])));
+    }
+
+    function splitCsvLine(line) {
+      const values = [];
+      let current = "";
+      let quoted = false;
+      for (let i = 0; i < line.length; i += 1) {
+        const char = line[i];
+        if (char === '"') quoted = !quoted;
+        else if (char === "," && !quoted) {
+          values.push(current);
+          current = "";
+        } else current += char;
+      }
+      values.push(current);
+      return values;
+    }
+
+    function yes(value) {
+      return ["1", "true", "co", "yes", "x", "hoc", "dang hoc"].includes(String(value).trim().toLowerCase());
+    }
+
+    function normalizeGender(value) {
+      const text = String(value || "").trim().toLowerCase();
+      if (!text) return "";
+      if (text === "nam" || text === "male") return "Nam";
+      if (text === "nu" || text === "nữ" || text === "female") return "Nữ";
+      return "Khác";
+    }
+
+    function normalizePayment(value) {
+      const text = String(value || "").trim().toLowerCase();
+      if (text.includes("da") || text.includes("đã") || text.includes("paid")) return "da thanh toan";
+      return "chua thanh toan";
+    }
+
+    function normalizeDateInput(value) {
+      return toDateInput(value);
+    }
+
+    function toDateInput(value) {
+      if (!value) return "";
+      if (typeof value === "number" && window.XLSX) {
+        const date = XLSX.SSF.parse_date_code(value);
+        return `${String(date.d).padStart(2, "0")}/${String(date.m).padStart(2, "0")}/${date.y}`;
+      }
+      const text = String(value).trim();
+      if (/^\d{2}\/\d{2}\/\d{4}$/.test(text)) return text;
+      if (/^\d{4}[/-]\d{2}[/-]\d{2}$/.test(text)) {
+        const [year, month, day] = text.split(/[/-]/);
+        return `${day}/${month}/${year}`;
+      }
+      const parts = text.split(/[/-]/);
+      if (parts.length === 3) return `${parts[0].padStart(2, "0")}/${parts[1].padStart(2, "0")}/${parts[2]}`;
+      return "";
+    }
+
+    function renderAll() {
+      renderSummary();
+      renderRecent();
+      renderDatabase();
+      renderList();
+      renderTuition();
+    }
+
+    function renderSummary() {
+      const active = students.filter((student) => student.status === "dang hoc").length;
+      const stopped = students.filter((student) => student.status === "da nghi").length;
+      const math = students.filter((student) => student.mathEnabled).length;
+      const english = students.filter((student) => student.englishEnabled).length;
+      $("summaryCards").innerHTML = [
+        metric(students.length, "Tổng học sinh", "total"),
+        metric(active, "Đang học", "active"),
+        metric(math, "Học Toán", "math"),
+        metric(english, "Học Tiếng Anh", "english"),
+        metric(stopped, "Đã nghỉ", "stopped")
+      ].join("");
+    }
+
+    function metric(value, label, tone) {
+      return `<div class="metric ${tone}"><b>${value}</b><span>${label}</span></div>`;
+    }
+
+  function renderRecent() {
+  $("recentStudents").innerHTML = tableFor(
+    students.slice(0, 5),
+    false,
+    "recent"
+  );
+}
+
+    function renderDatabase() {
+      const query = $("dbSearch").value.trim().toLowerCase();
+      const rows = filterStudents(query);
+      $("databaseTable").innerHTML = tableFor(rows, true);
+      bindTableButtons();
+    }
+
+    function renderList() {
+const query =
+  $("listSearch")
+    .value
+    .trim()
+    .toLowerCase();
+
+const status =
+  $("statusFilter").value;
+
+const paymentStatus =
+  $("paymentStatusFilter")?.value || "";
+
+const rows =
+  filterStudents(query)
+    .filter(student => {
+
+      const statusMatch =
+        !status ||
+        student.status === status;
+
+      const paymentMatch =
+        !paymentStatus ||
+        student.paymentStatus === paymentStatus;
+
+      return (
+        statusMatch &&
+        paymentMatch
+      );
+
+    });
+      $("studentList").innerHTML = tableFor(rows, false, "list");
+      bindTableButtons();
+    }
+  
+  function recalculatePaymentStatus() {
+
+  students.forEach(student => {
+
+    const payments =
+      student.paymentHistory || [];
+
+    if (payments.length > 0) {
+
+      student.paymentStatus =
+        "da thanh toan";
+
+    } else {
+
+      student.paymentStatus =
+        "chua thanh toan";
+
+    }
+
+  });
+
+}
+  
+    function renderTuition() {
+
+  const selectedMonth =
+    $("paymentMonthFilter")?.value || "";
+
+  let transactions = [];
+
+  students.forEach(student => {
+
+    (student.paymentHistory || [])
+      .forEach(payment => {
+
+        transactions.push({
+          student,
+          payment
+        });
+
+      });
+
+  });
+
+  if (selectedMonth) {
+
+    const [year, month] =
+      selectedMonth.split("-");
+
+   if(selectedMonth){
+
+  transactions =
+    transactions.filter(
+      ({payment}) =>
+
+        (payment.tuitionMonth || "")
+        === selectedMonth
+
+    );
+
+}
+  }
+
+  const totalRevenue =
+  students.reduce((sum, student) => {
+
+    return sum + (student.paymentHistory || [])
+      .reduce((s, payment) => {
+
+        return s +
+          Number(
+            String(payment.amount || "0")
+              .replace(/[^\d]/g, "")
+          );
+
+      }, 0);
+
+  }, 0);
+
+const monthlyRevenue =
+  transactions.reduce(
+    (sum, { payment }) =>
+      sum +
+      Number(
+        String(payment.amount || "0")
+          .replace(/[^\d]/g, "")
+      ),
+    0
+  );
+
+  const unpaidStudents =
+  students.filter(
+    s =>
+      s.paymentStatus === "chua thanh toan" ||
+      s.paymentStatus === "tre hoc phi"
+  );    
+
+  if ($("totalRevenue")) {
+    $("totalRevenue").textContent =
+      formatCurrency(totalRevenue);
+  }
+
+  if ($("monthlyRevenue")) {
+    $("monthlyRevenue").textContent =
+  formatCurrency(monthlyRevenue);
+  }
+
+  if ($("totalDebt")) {
+    $("totalDebt").textContent =
+      unpaidStudents.length;
+  }
+
+  const info = $("tuitionFilterInfo");
+
+  if (info) {
+
+    info.textContent =
+  `Đang xem học phí tháng ${selectedMonth}`;
+
+  }
+
+  renderPaymentTable(transactions);
+
+}
+    function renderPaymentTable(
+  rows = []
+){
+
+  if(rows.length===0){
+
+    $("paymentTable").innerHTML =
+      `<div class="empty">
+         Chưa có giao dịch
+       </div>`;
+
+    return;
+  }
+
+  $("paymentTable").innerHTML = `
+  <div class="table-wrap">
+    <table>
+
+      <thead>
+        <tr>
+        <th>
+  <input
+    type="checkbox"
+    id="checkAllPayments">
+</th>
+          <th>Mã HS</th>
+<th>Học sinh</th>
+<th>Môn học / Loại phí</th>
+<th>Tháng học phí</th>
+<th>Ngày</th>
+<th>Số tiền</th>
+<th>Phương thức</th>
+<th>Ghi Chú</th>
+<th>Thao tác</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        ${rows.map(({student,payment}) =>`
+
+          <tr>
+          
+            <td>
+  <input
+    type="checkbox"
+    class="payment-check"
+    value="${payment.id}">
+</td>
+            <td>${student.id}</td>
+
+            <td>${student.studentName}</td>
+            <td>${(payment.items || []).join(" | ")}</td>
+            <td>
+  ${payment.tuitionMonth || ""}
+</td>
+            <td>${payment.date || ""}</td>
+            
+            <td>${payment.amount || ""}</td>
+
+            <td>${payment.method || ""}</td>
+
+            <td>${payment.note || ""}</td>
+            <td>
+  <button
+    class="danger"
+    onclick="deletePayment(
+      '${student.id}',
+      '${payment.id}'
+    )">
+    Xóa
+  </button>
+</td>
+
+          </tr>
+
+        `).join("")}
+
+      </tbody>
+
+    </table>
+  </div>
+  `;
+  
+  const checkAll = $("checkAllPayments");
+
+if (checkAll) {
+
+  checkAll.addEventListener("change", (e) => {
+
+    document
+      .querySelectorAll(".payment-check")
+      .forEach(cb => {
+
+        cb.checked = e.target.checked;
+
+      });
+
+  });
+
+}
+}
+
+
+    function formatCurrency(value){
+
+  return Number(value)
+    .toLocaleString("vi-VN");
+
+}
+
+function exportPaymentExcel() {
+
+  const selectedMonth =
+    $("paymentMonthFilter")?.value || "";
+
+  let rows = [];
+
+  students.forEach(student => {
+
+    (student.paymentHistory || [])
+      .forEach(payment => {
+
+        rows.push({
+
+          maHocSinh:
+            student.id,
+
+          hocSinh:
+            student.studentName,
+
+          monHoc:
+  (payment.items || []).join(" | "),
+
+          ngayThanhToan:
+            payment.date || "",
+
+          soTien:
+  Number(
+    String(payment.amount || "0")
+      .replace(/[^\d]/g,"")
+  ),
+
+          phuongThuc:
+            payment.method || "",
+
+          khuyenMai:
+            payment.promotion || "",
+
+          ghiChu:
+            payment.note || ""
+
+        });
+
+      });
+
+  });
+
+  if (selectedMonth) {
+
+  transactions =
+    transactions.filter(
+      ({ payment }) =>
+
+        (payment.tuitionMonth || "")
+        === selectedMonth
+
+    );
+
+}
+  
+  const totalRevenue =
+  rows.reduce(
+    (sum,row)=>
+      sum + Number(row.soTien || 0),
+    0
+  );
+
+rows.push({});
+
+rows.push({
+  hocSinh: "TỔNG DOANH THU",
+  soTien: totalRevenue
+});
+
+  const worksheet =
+    XLSX.utils.json_to_sheet(rows);
+
+  const workbook =
+    XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    worksheet,
+    "DoanhThu"
+  );
+
+  const fileName =
+    selectedMonth
+      ? `DoanhThu_${selectedMonth}.xlsx`
+      : "ToanBoDoanhThu.xlsx";
+
+  XLSX.writeFile(
+    workbook,
+    fileName
+  );
+
+}
+    function filterStudents(query) {
+      if (!query) return students;
+      return students.filter(student =>
+  Object.values(student)
+    .join(" ")
+    .toLowerCase()
+    .includes(query)
+);
+    }
+    
+    async function deletePayment(
+  studentId,
+  paymentId
+){
+
+  if(
+    !confirm(
+      "Xóa giao dịch này?"
+    )
+  ){
+    return;
+  }
+
+  const student =
+    students.find(
+      s => s.id === studentId
+    );
+
+  if(!student){
+    return;
+  }
+
+  student.paymentHistory =
+    (student.paymentHistory || [])
+      .filter(
+        p => p.id !== paymentId
+      );
+
+  await persist();
+
+  renderAll();
+
+}
+window.deletePayment =
+  deletePayment;
+
+    function tableFor(rows, selectable, mode = "default") {
+      if (rows.length === 0) return `<div class="empty">Chưa có dữ liệu phù hợp.</div>`;
+      const isList = mode === "list";
+      const isRecent = mode === "recent";
+      return `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                ${selectable ? `<th><input id="checkAll" class="row-check" type="checkbox"></th>` : ""}
+                <th>Mã HS</th>
+                <th>Học sinh</th>
+                <th>Phụ huynh</th>
+                <th>Môn học</th>
+                <th>Địa chỉ</th>
+                <th>Trạng thái</th>
+                ${
+  isList
+    ? `<th>Thanh toán</th>`
+    : isRecent
+      ? ``
+      : `<th>Thao tác</th>`
+}
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map((student) => rowFor(student, selectable, mode)).join("")}
+            </tbody>
+          </table>
+        </div>`;
+    }
+
+    function rowFor(student, selectable, mode = "default") {
+  const isList = mode === "list";
+    const isRecent = mode === "recent";
+  const subjects = [
+    student.mathEnabled
+      ? `
+        <strong>Toán</strong><br>
+        Ngày bắt đầu: ${formatDate(student.mathStart) || "-"}<br>
+        Trình độ đầu vào: ${escapeHtml(student.mathLevel || "-")}<br>
+        Trình độ hiện tại: ${escapeHtml(student.mathCurrentLevel || "-")}<br>
+        <small>
+          ${student.mathDay1 || ""} ${student.mathTime1 || ""}
+          ${student.mathDay1 && student.mathTime1 ? "<br>" : ""}
+          ${student.mathDay2 || ""} ${student.mathTime2 || ""}
+        </small>
+      `
+      : "",
+
+    student.englishEnabled
+      ? `
+        <strong>Tiếng Anh</strong><br>
+        Ngày bắt đầu: ${formatDate(student.englishStart) || "-"}<br>
+        Trình độ đầu vào: ${escapeHtml(student.englishLevel || "-")}<br>
+        Trình độ hiện tại: ${escapeHtml(student.englishCurrentLevel || "-")}<br>
+        <small>
+          ${student.englishDay1 || ""} ${student.englishTime1 || ""}
+          ${student.englishDay1 && student.englishTime1 ? "<br>" : ""}
+          ${student.englishDay2 || ""} ${student.englishTime2 || ""}
+        </small>
+      `
+      : ""
+  ]
+    .filter(Boolean)
+    .join("<hr style='margin:6px 0;border:none;border-top:1px solid #eee;'>");
+
+  return `
+    <tr>
+      ${
+        selectable
+          ? `<td>
+              <input
+                class="row-check"
+                data-select="${student.id}"
+                type="checkbox"
+                ${selectedIds.has(student.id) ? "checked" : ""}
+              >
+            </td>`
+          : ""
+      }
+
+      <td>
+        <strong>${escapeHtml(student.id)}</strong><br>
+        <small>${formatDateTime(student.updatedAt)}</small>
+      </td>
+
+      <td>
+  ${escapeHtml(student.studentName)}<br>
+
+  <small>
+    ${escapeHtml(
+      [student.gender, student.email]
+        .filter(Boolean)
+        .join(" | ")
+    )}
+  </small>
+
+  ${
+    student.birthDate
+      ? `<br><small><strong>DOB:</strong> ${escapeHtml(student.birthDate)}</small>`
+      : ""
+  }
+</td>
+      <td>
+  ${escapeHtml(student.parentName)}<br>
+  <small>${escapeHtml(student.parentPhone)}</small>
+</td>
+
+<td class="student-subject">
+  ${subjects}
+</td>
+
+<td class="student-address">
+  ${escapeHtml(student.address)}
+</td>
+
+      <td>
+        <span class="status ${
+          student.status === "da nghi" ? "off" : ""
+        }">
+          ${displayStatus(student.status)}
+        </span>
+      </td>
+
+      ${
+  isRecent
+    ? ""
+    : `
+<td>
+  ${
+    isList
+      ? paymentControl(student)
+      : `
+      <div class="actions">
+        <button data-edit="${student.id}">
+          Sửa
+        </button>
+
+        <button data-toggle="${student.id}">
+          ${
+            student.status === "dang hoc"
+              ? "Đã nghỉ"
+              : "Đang học"
+          }
+        </button>
+
+        <button
+          class="danger"
+          data-delete="${student.id}">
+          Xóa
+        </button>
+      </div>
+      `
+  }
+</td>
+`
+}
+    </tr>
+  `;
+}
+
+    function bindTableButtons() {
+      document.querySelectorAll("[data-edit]").forEach((button) => button.addEventListener("click", () => editStudent(button.dataset.edit)));
+      document.querySelectorAll("[data-toggle]").forEach((button) => button.addEventListener("click", () => toggleStatus(button.dataset.toggle)));
+      document.querySelectorAll("[data-delete]").forEach((button) => button.addEventListener("click", () => deleteStudent(button.dataset.delete)));
+      document.querySelectorAll("[data-payopen]").forEach((button) => button.addEventListener("click", () => openPaymentPage(button.dataset.payopen)));
+      document.querySelectorAll("[data-select]").forEach((input) => input.addEventListener("change", () => {
+        input.checked ? selectedIds.add(input.dataset.select) : selectedIds.delete(input.dataset.select);
+      }));
+      const checkAll = $("checkAll");
+      if (checkAll) checkAll.addEventListener("change", () => {
+        document.querySelectorAll("[data-select]").forEach((input) => {
+          input.checked = checkAll.checked;
+          input.checked ? selectedIds.add(input.dataset.select) : selectedIds.delete(input.dataset.select);
+        });
+      });
+    }
+
+    function openPaymentPage(id) {
+      const student = students.find((item) => item.id === id);
+      if (!student) return;
+      activePaymentStudentId = id;
+      const details = student.paymentDetails || {};
+      paymentFields.studentId.value = id;
+      paymentFields.amount.value = details.amount || "";
+      paymentFields.promotion.value = details.promotion || "";
+      paymentFields.date.value = details.date || todayText();
+      paymentFields.method.value = details.method || "Chuyển khoản";
+      paymentFields.note.value = details.note || "";
+      paymentFields.items.forEach((input) => {
+        input.checked = Array.isArray(details.items) ? details.items.includes(input.value) : false;
+      });
+      $("paymentStudentInfo").textContent = `${student.id} - ${student.studentName} | Phụ huynh: ${student.parentName || "chưa có"} | Trạng thái: ${displayPayment(student.paymentStatus)}`;
+      switchView("payment");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    async function submitPayment(event) {
+      event.preventDefault();
+      const id = activePaymentStudentId || paymentFields.studentId.value;
+      const selectedItems = paymentFields.items.filter((input) => input.checked).map((input) => input.value);
+      if (!id) return;
+      if (selectedItems.length === 0) {
+        alert("Vui lòng chọn ít nhất một mục thanh toán.");
+        return;
+      }
+      const now = new Date().toISOString();
+      const paymentDetails = {
+          lastPayment = {
+  student,
+  payment: paymentDetails
+};
+        id:
+  Date.now().toString() +
+  Math.random()
+    .toString(36)
+    .substring(2,8),  
+        amount: paymentFields.amount.value.trim(),
+        promotion: paymentFields.promotion.value.trim(),
+        date: normalizeDateInput(paymentFields.date.value),
+        tuitionMonth:  paymentFields.month.value,
+        items: selectedItems,
+        note: paymentFields.note.value.trim(),
+        method: paymentFields.method.value,
+        submittedAt: now
+      };
+      students = students.map(
+  (student) =>
+    student.id === id
+      ? {
+          ...student,
+
+          paymentStatus: "da thanh toan",
+
+          paymentHistory: [
+            ...(student.paymentHistory || []),
+            paymentDetails
+          ],
+
+          paymentDetails,
+
+          updatedAt: now
+        }
+      : student
+);
+      await persist();
+
+lastPayment = {
+  studentId: id,
+  payment: paymentDetails
+};
+
+function showReceiptModal(){
+
+  $("receiptModal")
+    .classList
+    .remove("hidden");
+
+}
+
+function closeReceiptModal(){
+
+  $("receiptModal")
+    .classList
+    .add("hidden");
+
+}
+function printReceipt(){
+
+  if(!lastPayment){
+    alert("Không tìm thấy dữ liệu thanh toán");
+    return;
+  }
+
+  const student =
+    students.find(
+      s => s.id === lastPayment.studentId
+    );
+
+  if(!student){
+    return;
+  }
+
+  const payment =
+    lastPayment.payment;
+
+  const win =
+    window.open(
+      "",
+      "_blank"
+    );
+
+  win.document.write(`
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Phiếu Thu</title>
+
+<style>
+
+body{
+  font-family:Arial;
+  padding:30px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+td{
+  border:1px solid #ccc;
+  padding:8px;
+}
+
+h1{
+  text-align:center;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>PHIẾU THU HỌC PHÍ</h1>
+
+<table>
+
+<tr>
+<td>Mã học sinh</td>
+<td>${student.id}</td>
+</tr>
+
+<tr>
+<td>Học sinh</td>
+<td>${student.studentName}</td>
+</tr>
+
+<tr>
+<td>Phụ huynh</td>
+<td>${student.parentName}</td>
+</tr>
+
+<tr>
+<td>Ngày thanh toán</td>
+<td>${payment.date}</td>
+</tr>
+
+<tr>
+<td>Tháng học phí</td>
+<td>${payment.tuitionMonth}</td>
+</tr>
+
+<tr>
+<td>Môn học</td>
+<td>${(payment.items || []).join(", ")}</td>
+</tr>
+
+<tr>
+<td>Số tiền</td>
+<td>${formatCurrency(payment.amount)}</td>
+</tr>
+
+<tr>
+<td>Phương thức</td>
+<td>${payment.method}</td>
+</tr>
+
+</table>
+
+<script>
+window.print();
+</script>
+
+</body>
+</html>
+`);
+
+}
+    function cancelPayment() {
+      clearPaymentForm();
+      switchView("list");
+    }
+
+    function clearPaymentForm() {
+      activePaymentStudentId = "";
+      $("paymentForm").reset();
+      paymentFields.studentId.value = "";
+      $("paymentStudentInfo").textContent = "Chọn học sinh từ trang Danh sách để tạo thanh toán.";
+    }
+
+    async function updatePayment(id, paymentStatus) {
+      const now = new Date().toISOString();
+      students = students.map((student) => student.id === id ? { ...student, paymentStatus, updatedAt: now } : student);
+      await persist();
+      renderAll();
+    }
+
+    function exportCsv() {
+      const headers = ["id", "studentName", "birthDate", "gender", "email", "parentName", "parentPhone", "address", "mathEnabled", "mathStart", "mathLevel", "englishEnabled", "englishStart", "englishLevel", "paymentStatus", "paymentAmount", "paymentPromotion", "paymentDate", "paymentItems", "paymentMethod", "paymentNote", "status", "notes"];
+      const csv = [headers.join(","), ...students.map((student) => headers.map((header) => csvCell(exportValue(student, header))).join(","))].join("\n");
+      const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "students.csv";
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+    
+    function downloadTemplate(){
+
+  window.open(
+    "./Kumon_Import_Template.xlsx",
+    "_blank"
+  );
+
+}
+
+    function csvCell(value) {
+      return `"${String(value ?? "").replaceAll('"', '""')}"`;
+    }
+
+    function exportValue(student, header) {
+      const payment = student.paymentDetails || {};
+      const map = {
+        paymentAmount: payment.amount,
+        paymentPromotion: payment.promotion,
+        paymentDate: payment.date,
+        paymentItems: Array.isArray(payment.items) ? payment.items.join(" | ") : "",
+        paymentMethod: payment.method,
+        paymentNote: payment.note
+      };
+      return header in map ? map[header] : student[header];
+    }
+
+    function saveFirebaseConfig() {
+      try {
+        const parsed = JSON.parse($("firebaseConfig").value);
+        localStorage.setItem(CONFIG_KEY, JSON.stringify(parsed));
+        alert("Đã lưu cấu hình. Vui lòng tải lại trang để kết nối Firestore.");
+      } catch {
+        alert("Firebase config chưa đúng định dạng JSON.");
+      }
+    }
+
+    function clearFirebaseConfig() {
+      localStorage.removeItem(CONFIG_KEY);
+      alert("Đã chuyển về local database. Vui lòng tải lại trang.");
+    }
+
+    function sortByUpdated(a, b) {
+      return String(b.updatedAt || "").localeCompare(String(a.updatedAt || ""));
+    }
+
+    function displayStatus(status) {
+      return status === "da nghi" ? "Đã nghỉ" : "Đang học";
+    }
+
+    function displayPayment(paymentStatus) {
+      return paymentStatus === "da thanh toan" ? "Đã thanh toán" : "Chưa thanh toán";
+    }
+
+    function paymentControl(student) {
+      const value = student.paymentStatus || "chua thanh toan";
+      const details = student.paymentDetails;
+      return `
+        <span class="status ${value === "da thanh toan" ? "paid" : "unpaid"}">${displayPayment(value)}</span>
+        ${details ? `<br><small>${escapeHtml(details.date || "")}${details.amount ? ` | ${escapeHtml(formatMoney(details.amount))}` : ""}</small>` : ""}
+        <div class="actions" style="margin-top: 8px;">
+          <button data-payopen="${student.id}">${value === "da thanh toan" ? "Xem/Sửa" : "Thanh toán"}</button>
+        </div>
+      `;
+    }
+
+    function todayText() {
+      const now = new Date();
+      return `${String(now.getDate()).padStart(2, "0")}/${String(now.getMonth() + 1).padStart(2, "0")}/${now.getFullYear()}`;
+    }
+
+    function formatMoney(value) {
+      const number = Number(String(value).replace(/[^\d]/g, ""));
+      if (!number) return value;
+      return new Intl.NumberFormat("vi-VN").format(number);
+    }
+
+    function formatDate(value) {
+      if (!value) return "";
+      return toDateInput(value);
+    }
+
+    function formatDateTime(value) {
+      if (!value) return "";
+      return new Intl.DateTimeFormat("vi-VN", { dateStyle: "short", timeStyle: "short" }).format(new Date(value));
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[char]));
+    };
+    
+  </script>
+  
+    <script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc
+}
+from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCYM6Dscm6b_hq0WZAqPSI2WNQu5NQaYag",
+  authDomain: "kumon-hiepbinh.firebaseapp.com",
+  projectId: "kumon-hiepbinh",
+  storageBucket: "kumon-hiepbinh.firebasestorage.app",
+  messagingSenderId: "1054668776327",
+  appId: "1:1054668776327:web:b3039eb62dffc48f56e922"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* đưa ra global để script hiện tại dùng được */
+window.db = db;
+window.firestoreApi = {
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc
+};
+
+console.log("🔥 Firestore connected");
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+</body>
+</html>
+
