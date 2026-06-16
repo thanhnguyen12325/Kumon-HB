@@ -1330,18 +1330,20 @@ async function setupCloud() {
   }
   catch(error){
 
-    console.error(error);
+  console.error(error);
 
-    $("storageStatus").textContent =
-      "Local database";
+  $("storageStatus").textContent =
+    "Local database";
 
-    $("storageStatus").className =
-      "status local";
+  alert(
+    "Firestore lỗi:\n\n" +
+    error.name +
+    "\n\n" +
+    error.message
+  );
 
-    alert(
-      "Không kết nối được Firestore. Hệ thống chuyển sang Local Database."
-    );
-  }
+  cloud = null;
+}
 
 }
     async function loadStudents() {
