@@ -1289,14 +1289,23 @@ async function setupCloud() {
 
   try {
 
-    const config = {
-      apiKey: "AIzaSyCYM6Dscm6b_hq0WZAqPSI2WNQu5NQaYag",
-      authDomain: "kumon-hiepbinh.firebaseapp.com",
-      projectId: "kumon-hiepbinh",
-      storageBucket: "kumon-hiepbinh.firebasestorage.app",
-      messagingSenderId: "1054668776327",
-      appId: "1:1054668776327:web:b3039eb62dffc48f56e922"
-    };
+    // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyCYM6Dscm6b_hq0WZAqPSI2WNQu5NQaYag",
+  authDomain: "kumon-hiepbinh.firebaseapp.com",
+  projectId: "kumon-hiepbinh",
+  storageBucket: "kumon-hiepbinh.firebasestorage.app",
+  messagingSenderId: "1054668776327",
+  appId: "1:1054668776327:web:b3039eb62dffc48f56e922"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 
     const appMod =
       await import(
