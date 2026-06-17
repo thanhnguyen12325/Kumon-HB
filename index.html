@@ -1339,17 +1339,15 @@ const app = initializeApp(firebaseConfig);
   }
   catch(error){
 
-  console.error(error);
-
-  $("storageStatus").textContent =
-    "Local database";
-
   alert(
-    "Firestore lỗi:\n\n" +
+    "Firestore Error\n\n" +
     error.name +
     "\n\n" +
     error.message
   );
+
+  $("storageStatus").textContent =
+    "Local database";
 
   cloud = null;
 }
