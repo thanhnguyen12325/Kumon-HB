@@ -1314,15 +1314,47 @@ const app =
 const db =
   dbMod.getFirestore(app);
 
-await dbMod.getDocs(
-  dbMod.collection(db, "students")
+// test thật sự
+
+const test =
+  await dbMod.getDocs(
+    dbMod.collection(
+      db,
+      "students"
+    )
+  );
+
+console.log(
+  "Students:",
+  test.size
 );
 
 cloud = {
   db,
   ...dbMod
 };
-    
+
+$("storageStatus").textContent =
+  "Firestore online";
+
+$("storageStatus").className =
+  "status db";    
+
+    catch(error){
+
+  console.error(error);
+
+  alert(
+    error.name +
+    "\n\n" +
+    error.message
+  );
+
+  $("storageStatus").textContent =
+    "Local database";
+
+  cloud = null;
+}
 }
     async function loadStudents() {
       if (cloud) {
