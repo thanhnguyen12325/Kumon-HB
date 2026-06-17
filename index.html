@@ -1289,14 +1289,8 @@ async function setupCloud() {
 
   try {
 
-    // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCYM6Dscm6b_hq0WZAqPSI2WNQu5NQaYag",
+  apiKey: "...",
   authDomain: "kumon-hiepbinh.firebaseapp.com",
   projectId: "kumon-hiepbinh",
   storageBucket: "kumon-hiepbinh.firebasestorage.app",
@@ -1304,54 +1298,31 @@ const firebaseConfig = {
   appId: "1:1054668776327:web:b3039eb62dffc48f56e922"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-
-    const appMod =
-      await import(
-        "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js"
-      );
-
-    const dbMod =
-      await import(
-        "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js"
-      );
-
-    const app =
-      appMod.initializeApp(config);
-
-    const db =
-      dbMod.getFirestore(app);
-
-    cloud = {
-      db,
-      ...dbMod
-    };
-
-    $("storageStatus").textContent =
-      "Firestore online";
-
-    $("storageStatus").className =
-      "status db";
-
-    console.log("🔥 Firestore connected");
-
-  }
-  catch(error){
-
-  alert(
-    "Firestore Error\n\n" +
-    error.name +
-    "\n\n" +
-    error.message
+const appMod =
+  await import(
+    "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js"
   );
 
-  $("storageStatus").textContent =
-    "Local database";
+const dbMod =
+  await import(
+    "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js"
+  );
 
-  cloud = null;
-}
+const app =
+  appMod.initializeApp(firebaseConfig);
 
+const db =
+  dbMod.getFirestore(app);
+
+await dbMod.getDocs(
+  dbMod.collection(db, "students")
+);
+
+cloud = {
+  db,
+  ...dbMod
+};
+    
 }
     async function loadStudents() {
       if (cloud) {
