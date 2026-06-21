@@ -1338,9 +1338,9 @@ $("storageStatus").textContent =
   "Firestore online";
 
 $("storageStatus").className =
-  "status db";    
+  "status db";
 
-    catch(error){
+}} catch(error){
 
   console.error(error);
 
@@ -1355,7 +1355,7 @@ $("storageStatus").className =
 
   cloud = null;
 }
-}
+
     async function loadStudents() {
       if (cloud) {
         const snap = await cloud.getDocs(cloud.collection(cloud.db, "students"));
