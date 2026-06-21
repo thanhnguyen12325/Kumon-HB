@@ -1290,7 +1290,7 @@ async function setupCloud() {
   try {
 
 const firebaseConfig = {
-  apiKey: "...",
+  apiKey: "AIzaSyCYM6Dscm6b_hq0WZAqPSI2WNQu5NQaYag",
   authDomain: "kumon-hiepbinh.firebaseapp.com",
   projectId: "kumon-hiepbinh",
   storageBucket: "kumon-hiepbinh.firebasestorage.app",
@@ -2038,7 +2038,7 @@ if (errors.length) {
         id:
   row.id ||
   row.studentCode ||
-  generateStudentCode(),
+  nextImportId(),
         studentName: row.studentName || row.studentname || row.ten || row["ho ten"] || row["ho va ten hoc sinh"] || "",
         birthDate: normalizeDateInput(row.birthDate || row.birthdate || row["ngay sinh"]),
         gender: normalizeGender(row.gender || row["gioi tinh"]),
